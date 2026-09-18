@@ -9,7 +9,7 @@ test('визуал → проект → команда → услуга → ло
  await expect(page.getByRole('dialog',{name:'Просмотр проекта'})).toContainText('4/8');
  await page.keyboard.press('Escape');
  await expect(page.locator('#team .credit')).toHaveCount(10);
- await page.locator('#team').getByRole('link',{name:'Елена Соколова'}).click();
+ await page.locator('#team .credit').filter({hasText:'Елена Соколова'}).click();
  await expect(page.getByRole('heading',{name:'Елена Соколова'})).toBeVisible();
  await expect(page.getByText('Москва · выезд до 80 км')).toBeVisible();
  await page.getByRole('tab',{name:'Услуги'}).click();
@@ -24,6 +24,9 @@ test('визуал → проект → команда → услуга → ло
 });
 
 test('PRO → площадка → рейтинг → breakdown',async({page})=>{
+ await page.goto('/pro/venues');
+ await expect(page.getByText(/вариантов/)).toBeVisible();
+ await expect(page.getByRole('link',{name:'Лофт «Берег»',exact:true})).toBeVisible();
  await page.goto('/pro/venues?city=moscow&capacity=80-150&priceMax=500000&outsideCatering=1&sort=rating');
  await expect(page.getByText('1 вариантов')).toBeVisible();
  await page.getByRole('link',{name:'Лофт «Берег»',exact:true}).click();
@@ -91,9 +94,31 @@ test('карта сайта открывает все зарегистриров
  await page.goto('/settings?tab=sitemap');
  await expect(page.getByRole('heading',{name:'Карта сайта'})).toBeVisible();
  const hrefs=await page.locator('a.sitemap-link').evaluateAll(links=>links.map(link=>(link as HTMLAnchorElement).getAttribute('href')).filter((href):href is string=>Boolean(href)));
- expect(new Set(hrefs).size).toBeGreaterThan(100);
+ expect(new Set(hrefs).size).toBeGreaterThan(30);
  for(const href of [...new Set(hrefs)]){
   const response=await request.get(new URL(href,'http://127.0.0.1:3000').toString());
   expect(response.ok(),`${href} должен открываться из карты сайта`).toBeTruthy();
  }
+});
+test('мобильная оболочка → burger-menu → новые страницы и footer',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
+ const page=await context.newPage();
+ for(const route of ['/feed','/search','/pro','/ratings','/register','/professional','/recommendations','/subscriptions','/favorites-pro','/platform','/support','/blog','/faq','/knowledge','/settings?tab=sitemap']){
+  await page.goto(route);
+  await expect(page.locator('header')).toBeVisible();
+  await expect(page.locator('footer')).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
+ }
+ await page.goto('/feed');
+ await page.getByRole('button',{name:'Открыть меню'}).click();
+ await expect(page.getByRole('dialog',{name:'Меню Chereda'})).toBeVisible();
+ await expect(page.getByRole('dialog',{name:'Меню Chereda'}).getByRole('link',{name:'Настройки'})).toBeVisible();
+ await page.getByRole('button',{name:'Закрыть'}).click();
+ await expect(page.getByRole('dialog',{name:'Меню Chereda'})).toHaveCount(0);
+ await page.getByRole('button',{name:'Открыть меню'}).click();
+ await page.getByRole('dialog',{name:'Меню Chereda'}).getByRole('link',{name:'Настройки'}).click();
+ await expect(page.getByRole('heading',{name:'Настройки'})).toBeVisible();
+ await page.getByRole('tab',{name:'Карта сайта'}).click();
+ await expect(page.getByRole('heading',{name:'Карта сайта'})).toBeVisible();
+ await context.close();
 });

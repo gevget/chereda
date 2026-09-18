@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {CaretDown,MagnifyingGlass,X,CheckCircle} from '@phosphor-icons/react';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import {categories,cities,cityName} from '@/data/catalog';
@@ -26,8 +26,10 @@ function Pill({children,kind,open,onClick,count,onClear}:{children:React.ReactNo
 export function SearchDesignControls(){
   const {search,set}=useSearchControls();
   const [open,setOpen]=useState<PillKind>(null);
+  const controlsRef=useRef<HTMLDivElement>(null);
   const [query,setQuery]=useState(search.get('q')??'');
   useEffect(()=>{queueMicrotask(()=>setQuery(search.get('q')??''))},[search]);
+  useEffect(()=>{if(!open)return;const onPointerDown=(event:PointerEvent)=>{if(!controlsRef.current?.contains(event.target as Node))setOpen(null)};const onKeyDown=(event:KeyboardEvent)=>{if(event.key==='Escape')setOpen(null)};document.addEventListener('pointerdown',onPointerDown);document.addEventListener('keydown',onKeyDown);return()=>{document.removeEventListener('pointerdown',onPointerDown);document.removeEventListener('keydown',onKeyDown)}},[open]);
   const category=search.get('category')??'';
   const city=search.get('city')??'';
   const selectedStyles=useMemo(()=>((search.get('styles')??'').split(',').map(v=>v.trim()).filter(Boolean)),[search]);
@@ -36,7 +38,7 @@ export function SearchDesignControls(){
   const commitQuery=(value:string)=>set({q:value.trim()||null});
   const toggleStyle=(value:string)=>{const next=selectedStyles.includes(value)?selectedStyles.filter(v=>v!==value):[...selectedStyles,value];set({styles:next.length?next.join(','):null})};
   const suggestionsData=suggestions.map((label,index)=>({label,src:mediaById(projects[index%projects.length].mediaIds[index%projects[index%projects.length].mediaIds.length]).src}));
-  return <div className="search-design-controls">
+  return <div className="search-design-controls" ref={controlsRef}>
     <div className="search-design-filter-row">
       <form className="search-design-query search-design-pill-wrap" onSubmit={e=>{e.preventDefault();commitQuery(query)}}><div className="search-design-pill"><MagnifyingGlass size={16}/><input aria-label="Введённый запрос" value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')commitQuery(query)}} placeholder="Введите запрос"/>{query&&<button type="button" className="search-pill-clear inline" aria-label="Удалить запрос" onClick={()=>{setQuery('');set({q:null})}}><X size={14}/></button>}</div></form>
       <Pill kind="category" open={open==='category'} onClick={()=>setOpen(open==='category'?null:'category')} count={category?1:0} onClear={category?()=>set({category:null}):undefined}>{selectedCategory?.name??'Область творчества'}</Pill>
