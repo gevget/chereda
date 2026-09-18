@@ -41,6 +41,7 @@ export const buildSiteMap=(collections:Collection[]=initialCollections):SiteMapS
       page('/subscriptions','Подписки','Подписки на профессионалов'),
       page('/favorites-pro','Избранные PRO','Сохранённые профессионалы')
     ]},
+    {title:'Growth capabilities',description:'Демо-слой от вдохновения к управляемому event-проекту.',entries:[page('/brief','Visual → Brief','Структурированный brief из исходного проекта'),page('/projects/white-garden-wedding/room','Project Room','Рабочая комната проекта'),page('/crew-match','Crew Match','Подбор совместимой команды'),page('/requests','One Brief → Many Quotes','Сравнение demo-ответов'),page('/venue-fit','Venue Fit Engine','Объяснимый fit площадки'),page('/collections/'+sampleCollection.slug+'/board','Production Board','План из коллекции'),page('/credits/'+sampleProfile.slug,'Verified Credits Passport','Паспорт credits профиля'),page('/passport','Cross-Border Passport','Рынок, язык и валюта'),page('/partners','Pro Partner Hubs','B2B-preview команды'),page('/radar','Market Radar','Seeded investor analytics')]},
     {title:'Информационные разделы',description:'По одному маршруту каждого информационного шаблона.',entries:[
       page('/platform','Возможности платформы','Возможности Chereda'),
       page('/blog','Статья · блог','Представительный шаблон статьи'),
