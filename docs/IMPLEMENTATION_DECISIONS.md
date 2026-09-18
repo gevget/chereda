@@ -12,3 +12,7 @@
 8. Состояние этих сценариев хранится в localStorage под ключом chereda-growth-v1 с версией схемы 1: brief, комнаты, production boards и quote requests. Это позволяет проверить refresh/back без backend и не маскирует demo-ограничение.
 9. Values и market metrics в One Brief → Quotes, Venue Fit и Market Radar являются детерминированными демонстрационными данными. Они маркированы как demo и не трактуются как реальные цены, прогнозы спроса или обещания SLA.
 10. Project Room, Credits Passport и Partner Hubs используют существующие seed-сущности и ссылки Chereda: профили, проекты, credits и услуги остаются связными. Автоматические сообщения, приглашения, AI-матчинг и реальные проверки не отправляются.
+
+
+11. Capability-сценарии доступны не только из футера: investor Demo hub, «Возможности платформы», карточка проекта, Project Room, карточки коллекций, профиль специалиста и PRO-каталог дают контекстные переходы в следующие шаги. Query source у Visual → Brief выбирает исходный проект.
+12. При загрузке growth-состояния из localStorage интерфейс восстанавливает сохранённые brief, stage Project Room и колонки Production Board после refresh; версия ключа остаётся chereda-growth-v1.
