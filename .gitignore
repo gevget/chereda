@@ -1,0 +1,8 @@
+node_modules
+.pnpm-store
+.next
+out
+playwright-report
+test-results
+tmp
+*.tsbuildinfo

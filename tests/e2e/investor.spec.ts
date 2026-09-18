@@ -1,0 +1,62 @@
+import {test,expect} from 'playwright/test';
+
+test('визуал → проект → команда → услуга → локальная заявка',async({page})=>{
+ await page.goto('/feed?tab=for-you');
+ await page.getByRole('link',{name:'Белый сад',exact:true}).first().click();
+ await expect(page.getByRole('heading',{name:'Белый сад'})).toBeVisible();
+ await page.getByRole('button',{name:/Открыть кадр 1/}).click();
+ for(let i=0;i<3;i++)await page.keyboard.press('ArrowRight');
+ await expect(page.getByRole('dialog',{name:'Просмотр проекта'})).toContainText('4/8');
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#team .credit')).toHaveCount(10);
+ await page.locator('#team').getByRole('link',{name:'Елена Соколова'}).click();
+ await expect(page.getByRole('heading',{name:'Елена Соколова'})).toBeVisible();
+ await expect(page.getByText('Москва · выезд до 80 км')).toBeVisible();
+ await page.getByRole('tab',{name:'Услуги'}).click();
+ await expect(page).toHaveURL(/tab=services/);
+ await expect(page.getByText('Укладка + проба')).toBeVisible();
+ await page.getByRole('button',{name:'Выбрать услугу'}).first().click();
+ await page.getByRole('textbox',{name:'Ваше имя'}).fill('Тестовый Viewer');
+ await page.getByRole('textbox',{name:'Контакт для demo'}).fill('viewer@example.com');
+ await page.getByRole('textbox',{name:'Сообщение'}).fill('Нужна укладка для свадьбы.');
+ await page.getByRole('button',{name:'Сохранить demo-заявку'}).click();
+ await expect(page.getByText('Demo-заявка сохранена')).toBeVisible();
+});
+
+test('PRO → площадка → рейтинг → breakdown',async({page})=>{
+ await page.goto('/pro/venues?city=moscow&capacity=80-150&priceMax=500000&outsideCatering=1&sort=rating');
+ await expect(page.getByText('1 вариантов')).toBeVisible();
+ await page.getByRole('link',{name:'Лофт «Берег»',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Лофт «Берег»'})).toBeVisible();
+ await page.getByRole('link',{name:/Рейтинг категории/}).click();
+ await expect(page.getByRole('heading',{name:'Рейтинг профессионалов'})).toBeVisible();
+ await page.locator('.rank-row').filter({hasText:'Лофт «Берег»'}).getByRole('button').click();
+ await expect(page.getByRole('dialog',{name:'Как складывается рейтинг'})).toBeVisible();
+});
+
+test('проект → новая коллекция → город → тёмная тема → refresh',async({page})=>{
+ await page.goto('/projects/white-garden-wedding');
+ await page.getByRole('button',{name:'Сохранить',exact:true}).click();
+ await page.getByRole('textbox',{name:'Новая коллекция'}).fill('Сценарий инвестора');
+ await page.getByRole('button',{name:'Создать и сохранить'}).click();
+ await page.getByRole('status').getByRole('link',{name:'Открыть'}).click();
+ await expect(page.getByRole('heading',{name:'Сценарий инвестора'})).toBeVisible();
+ await expect(page.getByRole('link',{name:'Белый сад',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Москва'}).click();
+ await page.getByRole('dialog',{name:'Выберите город'}).getByRole('button',{name:'Санкт-Петербург'}).click();
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Тёмная'}).click();
+ await page.reload();
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ await expect(page.getByRole('button',{name:'Санкт-Петербург'})).toBeVisible();
+});
+
+test('О Chereda → проект → PRO',async({page})=>{
+ await page.goto('/about');
+ await expect(page.getByRole('heading',{name:/От вдохновения/})).toBeVisible();
+ await page.getByRole('link',{name:/Открыть пример/}).click();
+ await expect(page.getByRole('heading',{name:'Белый сад'})).toBeVisible();
+ await page.goto('/about');
+ await page.getByRole('link',{name:'Открыть PRO'}).click();
+ await expect(page.getByRole('heading',{name:'Каталог профессионалов'})).toBeVisible();
+});

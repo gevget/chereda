@@ -1,0 +1,12 @@
+export type City = {slug:string;name:string};
+export type Category = {slug:string;name:string;subcategories:string[]};
+export type Price = {kind:'from'|'fixed'|'range'|'request';from?:number;to?:number;currency:'RUB'|'KZT'|'AED';unit:string};
+export type Profile = {id:string;slug:string;name:string;type:'person'|'team'|'company'|'venue';category:string;subcategory:string;specialty:string;city:string;travel:'local'|'nearby'|'countrywide'|'international'|'remote';price:Price;bio:string;styles:string[];verified:boolean;rating:number;score:number;rank:number;capacity?:number;outsideCatering?:boolean;projectIds:string[];serviceIds:string[];avatar:string;cover:string};
+export type Service = {id:string;profileId:string;name:string;description:string;price:Price};
+export type Credit = {id:string;projectId:string;profileId:string;roleLabel:string;contribution:string;categoryId:string;serviceIds:string[];isLead:boolean;creditOrder:number;confirmed:boolean};
+export type Media = {id:string;projectId:string;src:string;alt:string;caption:string;isDemoContent:true};
+export type Project = {id:string;slug:string;title:string;description:string;eventType:string;city:string;date:string;styles:string[];tags:string[];mediaIds:string[];creditIds:string[];leadProfileId:string;reactions:number;saves:number;isDemoContent:true};
+export type Review = {id:string;profileId:string;projectId:string;author:string;rating:number;text:string;date:string};
+export type RatingEntry = {id:string;profileId:string;category:string;city:string;period:string;rank:number;movement:number;score:number;breakdown:{reviews:number;verification:number;projects:number;activity:number;engagement:number}};
+export type Collection = {slug:string;name:string;projectIds:string[]};
+export type Notice = {id:string;title:string;body:string;href:string;date:string};

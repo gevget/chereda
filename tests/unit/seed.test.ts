@@ -1,0 +1,19 @@
+import {describe,it,expect} from 'vitest';
+import {existsSync,readFileSync} from 'node:fs';
+import path from 'node:path';
+import {profiles,projects,media,credits,services,reviews,ratings,initialCollections,initialNotices} from '@/data/seed';
+
+describe('Chereda demo seed',()=>{
+ it('meets entity counts and unique IDs',()=>{
+  expect(profiles.length).toBeGreaterThanOrEqual(72);expect(projects.length).toBeGreaterThanOrEqual(30);expect(media.length).toBeGreaterThanOrEqual(220);expect(credits.length).toBeGreaterThanOrEqual(210);expect(services.length).toBeGreaterThanOrEqual(150);expect(reviews.length).toBeGreaterThanOrEqual(120);expect(ratings.length).toBeGreaterThanOrEqual(60);expect(initialCollections).toHaveLength(5);expect(initialNotices).toHaveLength(12);
+  for(const list of [profiles,projects,media,credits,services,reviews,ratings])expect(new Set(list.map(v=>v.id)).size).toBe(list.length);
+ });
+ it('keeps one project with ten real credits for White Garden',()=>{const p=projects.find(p=>p.slug==='white-garden-wedding')!;expect(p.mediaIds.length).toBeGreaterThanOrEqual(8);expect(p.creditIds).toHaveLength(10);expect(p.creditIds.map(id=>credits.find(c=>c.id===id)?.roleLabel)).toContain('Укладка');});
+ it('keeps participant geography and names coherent',()=>{expect(new Set(profiles.map(p=>p.name)).size).toBe(profiles.length);for(const c of credits){const profile=profiles.find(p=>p.id===c.profileId)!;const project=projects.find(p=>p.id===c.projectId)!;if(profile.city!==project.city)expect(profile.travel).not.toBe('local')}});
+ it('gives hero profiles meaningful service, project and review depth',()=>{for(const p of profiles.slice(0,18)){expect(p.serviceIds.length).toBeGreaterThanOrEqual(3);expect(p.projectIds.length).toBeGreaterThanOrEqual(3);expect(reviews.filter(r=>r.profileId===p.id).length).toBeGreaterThanOrEqual(7)}});
+ it('keeps every project, profile, credit, review and media relation valid',()=>{for(const p of projects){expect(p.mediaIds.length).toBeGreaterThan(0);expect(p.creditIds.length).toBeGreaterThan(0);for(const id of p.mediaIds)expect(media.some(m=>m.id===id&&m.projectId===p.id)).toBe(true);for(const id of p.creditIds)expect(credits.some(c=>c.id===id&&c.projectId===p.id)).toBe(true)}for(const c of credits){expect(profiles.some(p=>p.id===c.profileId)).toBe(true);expect(projects.some(p=>p.id===c.projectId)).toBe(true)}for(const p of profiles){expect(p.projectIds.length).toBeGreaterThanOrEqual(3);expect(p.serviceIds.length).toBeGreaterThanOrEqual(3);for(const id of p.projectIds)expect(credits.some(c=>c.projectId===id&&c.profileId===p.id)).toBe(true)}for(const r of reviews)expect(credits.some(c=>c.projectId===r.projectId&&c.profileId===r.profileId)).toBe(true)});
+ it('explains every score exactly',()=>{for(const r of ratings){expect(Object.values(r.breakdown).reduce((a,b)=>a+b,0)).toBe(r.score);expect(profiles.find(p=>p.id===r.profileId)?.score).toBe(r.score)}});
+ it('ships every manifest asset locally',()=>{const manifest=JSON.parse(readFileSync(path.resolve('public/media/manifest.json'),'utf8'));expect(manifest).toHaveLength(media.length);for(const item of manifest){expect(item.isDemoContent).toBe(true);expect(projects.some(p=>p.id===item.projectId)).toBe(true);expect(existsSync(path.resolve('public/media',item.file))).toBe(true)}});
+ it('ships every seed image path locally',()=>{for(const item of media)expect(existsSync(path.resolve('public',item.src.slice(1)))).toBe(true);for(const profile of profiles){expect(existsSync(path.resolve('public',profile.avatar.slice(1)))).toBe(true);expect(existsSync(path.resolve('public',profile.cover.slice(1)))).toBe(true)}});
+ it('uses valid collection and notification destinations',()=>{for(const c of initialCollections)for(const id of c.projectIds)expect(projects.some(p=>p.id===id)).toBe(true);for(const n of initialNotices)expect(projects.some(p=>n.href===`/projects/${p.slug}`)).toBe(true)});
+});
