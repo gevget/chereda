@@ -534,3 +534,7 @@ select.select:disabled{background-image:none;padding-right:12px}
   .search-design-menu{left:0!important;right:0!important;width:auto;max-width:calc(100vw - 32px)}
   .rating-filters .select{padding-right:48px}
 }
+
+/* Consistent page rhythm for information surfaces and interactive cards */
+.page>h1{margin-bottom:12px}.page>h1+.lede{margin-bottom:20px}.page>.lede+.row,.page>.lede+form,.page>.lede+.section{margin-top:20px}.card-body>.button,.card-body>.row,.card-body>form{margin-top:12px}.resource-flow{display:grid;gap:12px;margin-top:24px}.resource-flow-step{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;padding:20px}.resource-flow-step h3{margin:0 0 6px}.resource-flow-step p{margin:0 0 12px}.resource-step-number{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--surface-strong);font-weight:700;color:var(--text)}.notification-popover-list{display:grid;gap:10px}.notification-popover-item{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.notification-popover-item.read{opacity:.68}.notification-popover-item p{margin:4px 0 0;color:var(--muted)}.favorites-header-link{display:inline-flex}.favorites-page .empty{min-height:220px}
+@media (max-width:700px){.favorites-header-link{display:inline-flex;width:36px;height:36px}.resource-flow-step{padding:16px;gap:12px}.notification-popover-item{flex-direction:column}.notification-popover-item .button{width:100%}}

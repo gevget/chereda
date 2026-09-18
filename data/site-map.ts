@@ -27,6 +27,7 @@ export const buildSiteMap=(collections:Collection[]=initialCollections):SiteMapS
     ]},
     {title:'Viewer и сохранённое',description:'Личные разделы, коллекции и уведомления.',entries:[
       page('/me','Мой профиль','Сохранённые проекты, история и рекомендации'),
+      page('/favorites','Избранное','Проекты, отмеченные реакцией Viewer'),
       page('/collections','Коллекции','Все подборки Viewer'),
       {href:`/collections/${sampleCollection.slug}`,label:'Детали коллекции',description:'Заполненная коллекция с проектами',kind:'collection'},
       page('/notifications','Уведомления','Локальные события и обновления'),
