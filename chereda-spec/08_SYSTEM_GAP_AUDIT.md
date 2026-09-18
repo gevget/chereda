@@ -85,3 +85,16 @@
 - Проверки: pnpm typecheck, pnpm lint, pnpm test, pnpm build, pnpm test:e2e — успешно.
 
 Оставшиеся пункты этапов 2–4 требуют следующего прохода: category-dependent поля PRO, полноценные подписки/избранное PRO, расширенный footer, offline-состояние и отдельные E2E-сценарии для новых маршрутов.
+
+## 6. Выполнено во втором локальном проходе
+
+- Добавлены отдельные страницы recommendations, subscriptions, favorites-pro, platform, support, blog, faq, knowledge, video-lessons, webinars, api, complaint и offline.
+- Добавлены ссылки на новые разделы в profile menu и footer, включая группы «Платформа», «Поддержка» и «Профиль».
+- В меню добавлено локальное действие выхода из demo.
+- Профиль площадки расширен параметрами парковки, оснащения, кухни, доступности, outdoor и проживания.
+- В PRO применённые фильтры стали управляемыми chip-кнопками: каждый параметр можно снять отдельно или очистить одним действием.
+- Добавлена E2E-проверка onboarding → professional preview → recommendations → subscriptions → favorites → platform → support.
+- Локальная dev-конфигурация больше не пытается статически генерировать страницы, а export сохраняется для GitHub Pages.
+- Локальные проверки: typecheck, lint, unit tests, build и 5 E2E-сценариев проходят успешно.
+
+Следующий локальный проход: визуальный QA новых экранов на 360/768/1440 px и проверка реального offline-переключения в браузере.

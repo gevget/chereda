@@ -60,3 +60,29 @@ test('О Chereda → проект → PRO',async({page})=>{
  await page.getByRole('link',{name:'Открыть PRO'}).click();
  await expect(page.getByRole('heading',{name:'Каталог профессионалов'})).toBeVisible();
 });
+
+test('onboarding → конструктор → рекомендации и системные разделы',async({page})=>{
+ await page.goto('/register');
+ await page.getByRole('button',{name:/Профессионал/}).click();
+ await page.getByRole('textbox',{name:'Имя или название'}).fill('Demo Studio');
+ await page.getByRole('button',{name:'Продолжить'}).click();
+ await page.getByRole('button',{name:'Открыть конструктор'}).click();
+ await expect(page.getByRole('heading',{name:'Страница профессионала'})).toBeVisible();
+ await page.getByRole('textbox',{name:'Имя или название'}).fill('Demo Studio Pro');
+ await page.getByRole('button',{name:'Сохранить preview'}).click();
+ await expect(page.getByText('Профиль сохранён локально')).toBeVisible();
+ await page.goto('/recommendations');
+ await expect(page.getByRole('heading',{name:'Рекомендации для вас'})).toBeVisible();
+ await page.goto('/subscriptions');
+ await expect(page.getByRole('heading',{name:'Подписки'})).toBeVisible();
+ await page.goto('/favorites-pro');
+ await expect(page.getByRole('heading',{name:'Избранные PRO'})).toBeVisible();
+ await page.goto('/platform');
+ await expect(page.getByRole('heading',{name:/Все, что нужно/})).toBeVisible();
+ await page.goto('/support');
+ await expect(page.getByRole('heading',{name:/Поможем разобраться/})).toBeVisible();
+ for (const [path,title] of [['/blog','Идеи и практика'],['/faq','Ответы о Chereda'],['/knowledge','Chereda по шагам'],['/video-lessons','Разборы интерфейса'],['/webinars','Живые разборы'],['/api','Данные остаются под контролем'],['/complaint','Сообщить о проблеме']] as const) {
+  await page.goto(path);
+  await expect(page.getByRole('heading',{name:new RegExp(title)})).toBeVisible();
+ }
+});
