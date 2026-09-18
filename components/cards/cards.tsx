@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import {useRef} from 'react';
-import {Heart,BookmarkSimple,MapPin,Star,ArrowUpRight,CheckCircle,CaretLeft,CaretRight,ChatCircle,Briefcase,CurrencyRub,ImageSquare,Tag,UsersThree,DownloadSimple,ShareNetwork,Eye} from '@phosphor-icons/react';
+import {Heart,BookmarkSimple,MapPin,Star,ArrowUpRight,CheckCircle,CaretLeft,CaretRight,ChatCircle,Briefcase,CurrencyRub,ImageSquare,Tag,UsersThree,ShareNetwork,Eye} from '@phosphor-icons/react';
 import {profiles,projects,mediaById,creditsFor,reviews} from '@/data/seed';
 import {cityName} from '@/data/catalog';
 import type {Profile,Project,Price} from '@/types/domain';
@@ -21,7 +21,6 @@ export function ProShowcaseRail({profiles:items}:{profiles:Profile[]}){const ref
 export function VisualProjectCard({project,mediaIndex=0}:{project:Project;mediaIndex?:number}){
   const app=useApp()
   const m=mediaById(project.mediaIds[mediaIndex%project.mediaIds.length])
-  const lead=profiles.find(p=>p.id===project.leadProfileId)!
   const liked=app.likes.includes(project.id)
   const share=async()=>{
     try{await navigator.clipboard.writeText(location.origin+'/projects/'+project.slug);app.toast('Ссылка на проект скопирована')}
@@ -31,14 +30,14 @@ export function VisualProjectCard({project,mediaIndex=0}:{project:Project;mediaI
     <Link className="media-link" aria-label={project.title} href={'/projects/'+project.slug+'?media='+mediaIndex+'&from=feed'}>
       <img src={m.src} alt={project.title+': '+m.alt} loading="lazy"/>
       <span className="demo-label">Демо-визуал</span>
+      <span className="visual-card-inside-stats" aria-label="Статистика проекта">
+        <span title="Реакции"><Heart size={13}/> {project.reactions+(liked?1:0)}</span>
+        <span title="Просмотры"><Eye size={13}/> {Math.max(120,project.reactions*18)}</span>
+      </span>
     </Link>
     <div className="visual-card-actions" aria-label={'Действия проекта «'+project.title+'»'}>
       <button className="icon-btn" aria-label={liked?'Убрать реакцию':'Поставить реакцию'} title={liked?'Убрать реакцию':'Поставить реакцию'} onClick={()=>app.toggleLike(project.id)}><Heart size={17} weight={liked?'fill':'regular'} color={liked?'var(--brand-pro)':undefined}/></button>
-      <span className="visual-card-stat" title="Реакции"><Heart size={14}/> {project.reactions+(liked?1:0)}</span>
-      <span className="visual-card-stat" title="Просмотры"><Eye size={14}/> {Math.max(120,project.reactions*18)}</span>
       <button className="icon-btn" aria-label={'Сохранить проект '+project.title} title="Сохранить проект" onClick={()=>app.open('save',{projectId:project.id})}><BookmarkSimple size={17}/></button>
-      <a className="icon-btn" aria-label={'Скачать обложку проекта '+project.title} title="Скачать изображение" href={m.src} download onClick={e=>e.stopPropagation()}><DownloadSimple size={17}/></a>
-      <Link className="icon-btn" aria-label={'Открыть автора проекта '+project.title} title="Автор проекта" href={'/profiles/'+lead.slug} onClick={e=>e.stopPropagation()}><UsersThree size={17}/></Link>
       <button className="icon-btn" aria-label={'Поделиться проектом '+project.title} title="Поделиться" onClick={share}><ShareNetwork size={17}/></button>
     </div>
   </article>

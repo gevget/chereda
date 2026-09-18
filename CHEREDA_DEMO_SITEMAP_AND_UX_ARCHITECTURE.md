@@ -1969,3 +1969,14 @@ Demo архитектурно готово, когда:
 - финальная сборка investor demo.
 
 До следующего этапа новые роли и модули в scope не добавляются.
+
+## 6.2. Расширенный локальный реестр
+
+По мере расширения investor demo добавлены локальные маршруты, доступные из вкладки «Настройки → Карта сайта» (`/settings?tab=sitemap`):
+
+- `/register`, `/professional`, `/recommendations`, `/subscriptions`, `/favorites-pro`;
+- `/platform`, `/support`, `/blog`, `/faq`, `/knowledge`, `/video-lessons`, `/webinars`, `/api`, `/complaint`;
+- `/offline`, `/404`, `/error` как preview системных состояний;
+- все `/pro/[categorySlug]`, `/profiles/[profileSlug]`, `/projects/[projectSlug]` и `/collections/[collectionSlug]`, сгенерированные из связного demo-seed.
+
+Карта сайта собирается из тех же массивов категорий, профилей, проектов и коллекций, что используются страницами. Поэтому новая demo-сущность получает ссылку автоматически, а smoke-тест проверяет доступность каждого зарегистрированного href.

@@ -86,3 +86,14 @@ test('onboarding → конструктор → рекомендации и си
   await expect(page.getByRole('heading',{name:new RegExp(title)})).toBeVisible();
  }
 });
+
+test('карта сайта открывает все зарегистрированные маршруты',async({page,request})=>{
+ await page.goto('/settings?tab=sitemap');
+ await expect(page.getByRole('heading',{name:'Карта сайта'})).toBeVisible();
+ const hrefs=await page.locator('a.sitemap-link').evaluateAll(links=>links.map(link=>(link as HTMLAnchorElement).getAttribute('href')).filter((href):href is string=>Boolean(href)));
+ expect(new Set(hrefs).size).toBeGreaterThan(100);
+ for(const href of [...new Set(hrefs)]){
+  const response=await request.get(new URL(href,'http://127.0.0.1:3000').toString());
+  expect(response.ok(),`${href} должен открываться из карты сайта`).toBeTruthy();
+ }
+});
