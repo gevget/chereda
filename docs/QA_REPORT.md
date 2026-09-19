@@ -52,3 +52,13 @@
 - `/ratings` переработан в полноценный leaderboard: объяснение score и кнопка методики, URL-фильтры категории/города/периода, контекст выбранного среза, Top‑3 с verified, score, отзывами и переходом в профиль, полный список с динамикой и ссылками на отзывы.
 - Добавлен визуальный блок «Как считается рейтинг» с пятью факторами, значениями, progress-индикаторами, датой и явной маркировкой demo-методики. Score dialog дополнен ссылкой «Подробнее о методике».
 - Для рейтинга проверены фильтры, empty state другого города, совместное применение параметров, открытие score breakdown, переходы в профиль и отзывы, keyboard Enter на строке и отсутствие console errors.
+
+
+## Финальный release audit — 19.09.2026
+
+- Карта сайта дополнена тарифами и публичным Partner Hub; динамические сущности представлены по одному заполненному типу.
+- Контекстные входы проверены: project → brief/room, collection → brief/board, PRO → crew/requests/venue fit, profile → credits, partner preview → public hub, Radar → partner/catalog.
+- Добавлен E2E growth walkthrough и мобильный overflow-check всех десяти capability-страниц.
+- Добавлены unit-тесты связности Partner Hub, explainable team score, Venue Fit warnings и детерминированных Radar-срезов.
+- Рекламная позиция PRO маркируется текстом и золотой рамкой постоянно; она не зависит от hover.
+- Demo-ограничения: backend, auth, платежи, юридическая верификация, availability, отправка заявок и ML не подключены.

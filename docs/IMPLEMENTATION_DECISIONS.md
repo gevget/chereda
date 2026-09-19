@@ -16,3 +16,8 @@
 
 11. Capability-сценарии доступны не только из футера: investor Demo hub, «Возможности платформы», карточка проекта, Project Room, карточки коллекций, профиль специалиста и PRO-каталог дают контекстные переходы в следующие шаги. Query source у Visual → Brief выбирает исходный проект.
 12. При загрузке growth-состояния из localStorage интерфейс восстанавливает сохранённые brief, stage Project Room и колонки Production Board после refresh; версия ключа остаётся chereda-growth-v1.
+
+
+13. Финальный growth-релиз выносит scoring и связанные seed-сущности в data/growth.ts: explainable Crew Match, Venue Fit, Market Radar и Partner Hub проверяются unit-тестами. Public Partner Hub имеет canonical route /partners/studio-chereda и использует существующие profile/project IDs.
+14. Монетизация показана через /pricing и явно маркированное рекламное размещение в рекомендуемой PRO-выдаче. Free, Plus и Pro являются capability tiers. Оплата, биллинг, CRM и реальные лиды остаются preview.
+15. Project Room получил URL-вкладки, бюджет, задачи и moodboard; Visual Brief получил редактируемые роли и объяснения; Production Board сохраняет ссылки на исходные проекты; общий reset удаляет chereda-growth-v1.

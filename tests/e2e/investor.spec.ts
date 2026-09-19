@@ -26,6 +26,7 @@ test('визуал → проект → команда → услуга → ло
 test('PRO → площадка → рейтинг → breakdown',async({page})=>{
  await page.goto('/pro/venues');
  await expect(page.getByText(/вариантов/)).toBeVisible();
+ await expect(page.getByText('Реклама · платное размещение').first()).toBeVisible();
  await expect(page.getByRole('link',{name:'Лофт «Берег»',exact:true})).toBeVisible();
  await page.goto('/pro/venues?city=moscow&capacity=80-150&priceMax=500000&outsideCatering=1&sort=rating');
  await expect(page.getByText('1 вариантов')).toBeVisible();
@@ -103,7 +104,7 @@ test('карта сайта открывает все зарегистриров
 test('мобильная оболочка → burger-menu → новые страницы и footer',async({browser})=>{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
  const page=await context.newPage();
- for(const route of ['/feed','/search','/pro','/ratings','/register','/professional','/recommendations','/subscriptions','/favorites-pro','/platform','/support','/blog','/faq','/knowledge','/settings?tab=sitemap']){
+ for(const route of ['/feed','/search','/pro','/ratings','/register','/professional','/recommendations','/subscriptions','/favorites-pro','/platform','/pricing','/support','/blog','/faq','/knowledge','/settings?tab=sitemap','/brief','/projects/white-garden-wedding/room','/crew-match','/requests','/venue-fit','/collections/wedding-shortlist/board','/credits/anna-mironova-photo','/passport','/partners','/partners/studio-chereda','/radar']){
   await page.goto(route);
   await expect(page.locator('header')).toBeVisible();
   await expect(page.locator('footer')).toBeVisible();
@@ -121,4 +122,29 @@ test('мобильная оболочка → burger-menu → новые стр�
  await page.getByRole('tab',{name:'Карта сайта'}).click();
  await expect(page.getByRole('heading',{name:'Карта сайта'})).toBeVisible();
  await context.close();
+});
+
+
+test('growth path: проект → brief → room → crew → requests → partner → radar',async({page})=>{
+ await page.goto('/projects/white-garden-wedding');
+ await page.getByRole('link',{name:/Сделать brief/}).click();
+ await expect(page.getByRole('heading',{name:'Превратите визуал в задачу'})).toBeVisible();
+ await expect(page.getByText('Почему мы так решили')).toBeVisible();
+ await page.getByRole('button',{name:/Сохранить brief/}).click();
+ await page.getByRole('link',{name:/Создать Project Room/}).click();
+ await page.getByRole('link',{name:'Бюджет'}).click();
+ await expect(page.getByRole('heading',{name:'Площадка'})).toBeVisible();
+ await page.goto('/crew-match');
+ await expect(page.getByText(/Совместимость/).first()).toBeVisible();
+ await page.getByRole('button',{name:/Добавить в room/}).first().click();
+ await page.reload();
+ await expect(page.getByText('1 добавлено в shortlist')).toBeVisible();
+ await page.goto('/requests');
+ await page.getByRole('button',{name:'Отправить'}).first().click();
+ await expect(page.getByText('Ответ получен').first()).toBeVisible();
+ await page.goto('/partners/studio-chereda');
+ await expect(page.getByRole('heading',{name:'Studio Chereda / Moscow'})).toBeVisible();
+ await page.goto('/radar');
+ await page.getByLabel('Период').selectOption('year');
+ await expect(page.getByText(/Demo snapshot/)).toContainText('year');
 });
