@@ -553,3 +553,55 @@ select.select:disabled{background-image:none;padding-right:12px}
 .promotion-label{display:inline-flex;width:max-content;margin:0 0 10px;padding:4px 8px;border:1px solid var(--brand-gold);border-radius:8px;color:var(--text-primary);background:color-mix(in srgb,var(--brand-gold) 13%,var(--bg-surface));font-size:11px;font-weight:650}.pro-catalog-card:has(.promotion-label),.pro-showcase-card:has(.promotion-label){border-color:var(--brand-gold)}.growth-reasons,.growth-warnings{display:grid;gap:7px}.growth-reason,.growth-warnings span{display:flex;align-items:flex-start;gap:7px}.growth-board-prompts{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0}.growth-board-prompts .card{display:flex;flex-direction:column;gap:8px}.growth-board-prompts .button{margin-top:auto;width:max-content}.growth-pro-links{margin:14px 0 22px}
 @media(max-width:700px){.growth-board-prompts{grid-template-columns:1fr}.promotion-label{white-space:normal}.growth-pro-links{margin-top:10px}}
 .pricing-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pricing-card{display:flex;flex-direction:column;gap:16px}.pricing-card .button{margin-top:auto;width:max-content}.pricing-card.featured{border-color:var(--brand-pro);box-shadow:0 0 0 2px var(--brand-pro-soft)}@media(max-width:800px){.pricing-grid{grid-template-columns:1fr}}
+
+
+/* Laptop layout audit: keep cards readable and use the available row width. */
+.grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.project-credit-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.profile-projects-grid,.viewer-project-grid,.viewer-recommendation-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}
+.profile-services-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.rating-top-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rating-top-card,.project-credit-card,.profile-card,.service-card{min-width:0}
+.card-body{padding:18px}
+.card-body>h2,.card-body>h3{margin-bottom:10px}
+.card-body>p:last-child{margin-bottom:0}
+.project-credit-card,.rating-top-card,.rating-factor,.service-card,.settings-card,.viewer-collection-row{border-radius:16px}
+
+@media(max-width:1279px) and (min-width:1024px){
+  .grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+  .project-credit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .profile-services-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media(max-width:1023px) and (min-width:768px){
+  .container{width:calc(100% - 48px)}
+  .grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+  .rating-top-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rating-top-card{min-height:0}
+  .rating-factor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .project-credit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .profile-projects-grid,.viewer-project-grid,.viewer-recommendation-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+  .profile-services-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .settings-layout{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:767px){
+  .grid,.project-credit-grid,.profile-projects-grid,.viewer-project-grid,.viewer-recommendation-grid,.profile-services-grid,.rating-top-grid,.rating-factor-grid{grid-template-columns:1fr}
+  .card-body{padding:16px}
+  .search-page .grid,.search-page.has-query .grid,.search-page:has(.searchbar) .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+.project-detail-layout>*,.profile-detail-page>*{min-width:0}
+.project-media-rail{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+@media(max-width:767px){
+  .project-detail-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .project-detail-actions .button{width:100%;min-width:0}
+  .project-summary-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .project-summary-metrics span{min-width:0}
+}
+
+
+@media(max-width:1023px) and (min-width:768px){
+  .search-page .grid,.search-page.has-query .grid,.search-page:has(.searchbar) .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

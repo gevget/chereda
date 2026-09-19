@@ -148,3 +148,47 @@ test('growth path: проект → brief → room → crew → requests → par
  await page.getByLabel('Период').selectOption('year');
  await expect(page.getByText(/Demo snapshot/)).toContainText('year');
 });
+
+
+test('ноутбучная сетка сохраняет читаемую ширину карточек',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:900,height:800}});
+ const page=await context.newPage();
+ await page.goto('/projects/white-garden-wedding');
+ await expect(page.locator('.project-credit-card')).toHaveCount(10);
+ const projectWidths=await page.locator('.project-credit-card').evaluateAll(cards=>cards.slice(0,4).map(card=>card.getBoundingClientRect().width));
+ expect(Math.min(...projectWidths)).toBeGreaterThan(340);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
+ await page.goto('/ratings');
+ const ratingWidths=await page.locator('.rating-top-card').evaluateAll(cards=>cards.map(card=>card.getBoundingClientRect().width));
+ expect(ratingWidths).toHaveLength(3);
+ expect(Math.min(...ratingWidths)).toBeGreaterThan(340);
+ expect(Math.max(...ratingWidths)).toBeLessThan(500);
+ await page.goto('/search');
+ await expect(page.locator('.project-card').first()).toBeVisible();
+ const searchWidths=await page.locator('.project-card').evaluateAll(cards=>cards.slice(0,3).map(card=>card.getBoundingClientRect().width));
+ expect(Math.min(...searchWidths)).toBeGreaterThan(240);
+ await context.close();
+});
+
+
+
+test('все типы страниц содержательны и не создают горизонтальный скролл',async({browser})=>{
+ test.setTimeout(120000);
+ const desktop=await browser.newContext({viewport:{width:900,height:800}});
+ const index=await desktop.newPage();
+ await index.goto('/settings?tab=sitemap');
+ const hrefs=await index.locator('a.sitemap-link').evaluateAll(links=>[...new Set(links.map(link=>(link as HTMLAnchorElement).getAttribute('href')).filter((href):href is string=>Boolean(href)))]);
+ await index.close();
+ for(const width of [900,390]){
+  const context=width===900?desktop:await browser.newContext({viewport:{width,height:844},isMobile:true});
+  const page=await context.newPage();
+  for(const href of hrefs){
+   await page.goto(href,{waitUntil:'domcontentloaded'});
+   await expect(page.locator('#main h1').first()).toBeVisible();
+   expect((await page.locator('#main').innerText()).length,href+' должен содержать заполненный экран').toBeGreaterThan(80);
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),href+' не должен создавать горизонтальный скролл').toBeTruthy();
+  }
+  await page.close();
+  await context.close();
+ }
+});
