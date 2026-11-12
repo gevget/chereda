@@ -252,6 +252,21 @@ test('избранное PRO сравнивает shortlist и ведёт к з�
  await expect(page.getByRole('dialog',{name:'Записаться к специалисту'})).toBeVisible();
 });
 
+test('непозитивные состояния и диалог сброса дают понятный выход',async({page})=>{
+ await page.goto('/feed?state=empty');
+ await expect(page.getByRole('heading',{name:'Здесь пока пусто'})).toBeVisible();
+ await expect(page.getByRole('link',{name:'Повторить и открыть страницу'})).toHaveAttribute('href',/\/feed\/?$/);
+ await page.goto('/search?state=error');
+ await expect(page.getByRole('heading',{name:'Не удалось показать данные'})).toBeVisible();
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Сбросить demo-state'}).click();
+ const dialog=page.getByRole('alertdialog',{name:'Сбросить demo-состояние?'});
+ await expect(dialog).toBeVisible();
+ await expect(dialog.getByRole('button',{name:'Отмена'})).toBeFocused();
+ await page.keyboard.press('Escape');
+ await expect(dialog).toHaveCount(0);
+});
+
 test('подписки помогают сравнить условия и перейти к локальной записи',async({page})=>{
  await page.goto('/subscriptions');
  await expect(page.getByRole('button',{name:'Сравнить'}).first()).toBeVisible();
