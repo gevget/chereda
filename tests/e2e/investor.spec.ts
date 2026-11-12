@@ -15,7 +15,7 @@ test('визуал → проект → команда → услуга → ло
  await page.getByRole('tab',{name:'Услуги'}).click();
  await expect(page).toHaveURL(/tab=services/);
  await expect(page.getByText('Укладка + проба')).toBeVisible();
- await page.getByRole('button',{name:'Выбрать услугу'}).first().click();
+ await page.getByRole('button',{name:'Записаться'}).first().click();
  await page.getByRole('textbox',{name:'Ваше имя'}).fill('Тестовый Viewer');
  await page.getByRole('textbox',{name:'Контакт для demo'}).fill('viewer@example.com');
  await page.getByRole('textbox',{name:'Сообщение'}).fill('Нужна укладка для свадьбы.');
@@ -191,4 +191,13 @@ test('все типы страниц содержательны и не созд
   await page.close();
   await context.close();
  }
+});
+
+test('дополнительные страницы ведут в понятный следующий сценарий',async({page})=>{
+ await page.goto('/knowledge');
+ await expect(page.getByText('Как использовать Chereda')).toBeVisible();
+ await expect(page.getByText('3 простых шага')).toBeVisible();
+ await page.goto('/profiles/anna-mironova-photo?tab=services');
+ await page.getByRole('button',{name:'Записаться'}).first().click();
+ await expect(page.getByRole('dialog',{name:'Записаться к специалисту'})).toBeVisible();
 });
