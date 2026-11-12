@@ -207,7 +207,7 @@ test('из карточки профессионала можно сразу п�
  const button=page.getByRole('button',{name:'Подписаться'}).first();
  await expect(button).toBeVisible();
  await button.click();
- await expect(page.getByRole('button',{name:'Вы подписаны'}).first()).toBeVisible();
+ await expect(page.locator('.profile-card .subscription-card-button[aria-pressed="true"]').first()).toBeVisible();
  await page.goto('/subscriptions');
  await expect(page.locator('.profile-card').first()).toBeVisible();
 });
