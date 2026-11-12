@@ -230,6 +230,28 @@ test('поиск применяет сортировку из URL к карто�
  await expect(page.locator('select[aria-label="Сортировка поиска"]')).toHaveValue('rating');
 });
 
+test('PRO-каталог сохраняет кандидата для возврата к сравнению',async({page})=>{
+ await page.goto('/pro/venues');
+ const save=page.locator('.pro-catalog-card').filter({hasText:'Лофт «Берег»'}).locator('.pro-catalog-save');
+ await save.click();
+ await expect(save).toHaveAttribute('aria-pressed','true');
+ await page.goto('/favorites-pro');
+ await expect(page.getByRole('heading',{name:'Избранные PRO'})).toBeVisible();
+ await expect(page.getByRole('link',{name:'Лофт «Берег»',exact:true})).toBeVisible();
+});
+
+test('избранное PRO сравнивает shortlist и ведёт к записи',async({page})=>{
+ await page.goto('/favorites-pro');
+ await page.evaluate(()=>localStorage.setItem('chereda-favorites-pro',JSON.stringify(['loft-bereg','anna-mironova-photo'])));
+ await page.reload();
+ await page.getByRole('button',{name:'Сравнить'}).nth(0).click();
+ await page.getByRole('button',{name:'Сравнить'}).nth(0).click();
+ await expect(page.getByRole('heading',{name:'Сравнение кандидатов'})).toBeVisible();
+ await expect(page.locator('.compare-table')).toContainText('Рейтинг');
+ await page.locator('.compare-table').getByRole('button',{name:'Записаться'}).first().click();
+ await expect(page.getByRole('dialog',{name:'Записаться к специалисту'})).toBeVisible();
+});
+
 test('подписки помогают сравнить условия и перейти к локальной записи',async({page})=>{
  await page.goto('/subscriptions');
  await expect(page.getByRole('button',{name:'Сравнить'}).first()).toBeVisible();
