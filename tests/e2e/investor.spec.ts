@@ -201,3 +201,42 @@ test('дополнительные страницы ведут в понятны
  await page.getByRole('button',{name:'Записаться'}).first().click();
  await expect(page.getByRole('dialog',{name:'Записаться к специалисту'})).toBeVisible();
 });
+
+test('из карточки профессионала можно сразу подписаться и вернуться к нему',async({page})=>{
+ await page.goto('/search?tab=profiles');
+ const button=page.getByRole('button',{name:'Подписаться'}).first();
+ await expect(button).toBeVisible();
+ await button.click();
+ await expect(page.getByRole('button',{name:'Вы подписаны'}).first()).toBeVisible();
+ await page.goto('/subscriptions');
+ await expect(page.locator('.profile-card').first()).toBeVisible();
+});
+
+test('визуальная карточка сразу раскрывает автора и подписку',async({page})=>{
+ await page.goto('/feed?tab=for-you');
+ const card=page.locator('.project-card-visual').first();
+ await expect(card.getByRole('link',{name:/Открыть профиль/})).toBeVisible();
+ const subscribe=card.locator('button.subscription-card-button');
+ await subscribe.click();
+ await expect(subscribe).toHaveAttribute('aria-pressed','true');
+});
+
+test('поиск применяет сортировку из URL к карточкам результатов',async({page})=>{
+ await page.goto('/search?tab=profiles&sort=recommended');
+ const recommended=await page.locator('.result-grid .profile-card .card-title').first().textContent();
+ await page.goto('/search?tab=profiles&sort=rating');
+ const rating=await page.locator('.result-grid .profile-card .card-title').first().textContent();
+ expect(recommended).not.toBe(rating);
+ await expect(page.locator('select[aria-label="Сортировка поиска"]')).toHaveValue('rating');
+});
+
+test('подписки помогают сравнить условия и перейти к локальной записи',async({page})=>{
+ await page.goto('/subscriptions');
+ await expect(page.getByRole('button',{name:'Сравнить'}).first()).toBeVisible();
+ await page.getByRole('button',{name:'Сравнить'}).nth(0).click();
+ await page.getByRole('button',{name:'Сравнить'}).nth(0).click();
+ await expect(page.getByRole('heading',{name:'Сравнение условий'})).toBeVisible();
+ await expect(page.locator('.compare-table')).toContainText('Цена');
+ await page.locator('.compare-table').getByRole('button',{name:'Записаться'}).first().click();
+ await expect(page.getByRole('dialog',{name:'Записаться к специалисту'})).toBeVisible();
+});
