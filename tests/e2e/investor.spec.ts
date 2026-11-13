@@ -727,6 +727,28 @@ test('плашки реакций и просмотров следуют акт�
  expect(darkSurfaces.every(color=>isSurface(color,'dark'))).toBe(true);
 });
 
+test('портреты и обложки профилей загружаются без повторов на desktop и mobile',async({browser})=>{
+ const profilePaths=['/profiles/anna-mironova-photo','/profiles/profile-19','/profiles/profile-72'];
+ for(const width of [1440,390]){
+  const context=await browser.newContext({viewport:{width,height:900},isMobile:width<600});
+  const page=await context.newPage();
+  for(const theme of ['light','dark']){
+   for(const path of profilePaths){
+    await page.goto(path);
+    await expect(page.locator('.profile-heading .avatar')).toBeVisible();
+    await expect(page.locator('.profile-cover')).toBeVisible();
+    await page.evaluate(value=>document.documentElement.dataset.theme=value,theme);
+    const avatar=page.locator('.profile-heading .avatar');
+    const cover=page.locator('.profile-cover');
+    await expect.poll(()=>avatar.evaluate(element=>(element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    await expect.poll(()=>cover.evaluate(element=>(element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
+   }
+  }
+  await context.close();
+ }
+});
+
 test('мобильные действия проекта появляются после ухода галереи и не перекрывают навигацию',async({page})=>{
  await page.setViewportSize({width:360,height:800});
  await page.goto('/projects/white-garden-wedding');
