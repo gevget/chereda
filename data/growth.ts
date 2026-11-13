@@ -1,4 +1,5 @@
-import type {Profile} from '@/types/domain';
+import type {Credit,Profile,Project} from '@/types/domain';
+import {cityName} from '@/data/catalog';
 
 export type MarketContext={market:'RU'|'EU';currency:'RUB'|'EUR';language:'ru'|'en'};
 export type BriefSeed={eventType:string;styleTags:string[];palette:string[];roleHints:string[];reasons:string[]};
@@ -19,6 +20,22 @@ export const teamMatch=(profile:Profile,source:Profile[]):MatchResult=>{
   const trust=profile.verified;
   const score=Math.min(97,42+shared*8+(style?18:0)+(city?16:0)+(trust?9:0));
   return {profileId:profile.id,score,sharedProjectCount:shared,reasons:[shared?`${shared} общих проекта в credits`:'Дополняет роли текущей команды',style?'Совпадает визуальный стиль':'Добавляет новое направление',city?'Подходит по городу или выезду':'Нужно уточнить выезд',trust?'Профиль подтверждён в demo':'Credit требует уточнения']};
+};
+
+export type ProjectTeamRecommendation={profile:Profile;reason:string;score:number};
+export const recommendProjectTeam=(project:Project,credits:Credit[],candidates:Profile[],limit=4):ProjectTeamRecommendation[]=>{
+  const creditedIds=new Set(credits.filter(credit=>credit.projectId===project.id).map(credit=>credit.profileId));
+  const projectStyles=new Set(project.styles.map(style=>style.trim().toLocaleLowerCase('ru')));
+  return candidates.filter(profile=>!creditedIds.has(profile.id)&&(profile.city===project.city||profile.travel==='countrywide'||profile.travel==='international'))
+    .map(profile=>{
+      const matchedStyles=profile.styles.filter(style=>projectStyles.has(style.trim().toLocaleLowerCase('ru')));
+      const sameCity=profile.city===project.city;
+      return {profile,matchedStyles,sameCity,score:matchedStyles.length*20+(sameCity?8:0)+(profile.verified?2:0)+profile.rating/10};
+    })
+    .filter(item=>item.matchedStyles.length>0)
+    .sort((a,b)=>b.score-a.score||a.profile.name.localeCompare(b.profile.name,'ru'))
+    .slice(0,limit)
+    .map(({profile,matchedStyles,sameCity,score})=>({profile,score,reason:`Стиль: ${matchedStyles.slice(0,2).join(' · ')} · ${sameCity?cityName(profile.city):'Готов к выезду'}`}));
 };
 
 export const venueFit=(profile:Profile)=>{
