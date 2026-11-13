@@ -238,6 +238,28 @@ function useComparedProfiles(){
   return [compared,updateCompared,ready] as const
 }
 
+const comparisonServiceStorageKey='chereda-profile-comparison-services-v1'
+function ProfileComparisonTable({profiles:comparedProfiles}:{profiles:typeof profiles}){
+  const app=useApp()
+  const [serviceChoices,setServiceChoices]=useState<Record<string,string>>({})
+  const [ready,setReady]=useState(false)
+  useEffect(()=>{queueMicrotask(()=>{try{const raw=readBrowserValue(comparisonServiceStorageKey);if(raw){const parsed=JSON.parse(raw);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))setServiceChoices(Object.fromEntries(Object.entries(parsed).filter((entry):entry is [string,string]=>typeof entry[1]==='string')))}}catch{}setReady(true)})},[])
+  useEffect(()=>{if(ready)writeBrowserValue(comparisonServiceStorageKey,JSON.stringify(serviceChoices))},[ready,serviceChoices])
+  const serviceFor=(profileId:string)=>{const available=services.filter(service=>service.profileId===profileId);return available.find(service=>service.id===serviceChoices[profileId])??available[0]}
+  const travelLabel=(profile:typeof profiles[number])=>profile.travel==='nearby'?'До 80 км':profile.travel==='countrywide'?'По России':profile.travel==='international'?'Международный':profile.travel==='remote'?'Онлайн':profile.type==='venue'?'На площадке':'В городе'
+  return <div className="card compare-table-wrap"><table className="compare-table"><thead><tr><th scope="col">Параметр</th>{comparedProfiles.map(profile=><th scope="col" key={profile.id}>{profile.name}</th>)}</tr></thead><tbody>
+    <tr><th scope="row">Специализация</th>{comparedProfiles.map(profile=><td key={profile.id}>{profile.specialty} · {profile.subcategory}</td>)}</tr>
+    <tr><th scope="row">Услуга для сравнения</th>{comparedProfiles.map(profile=>{const available=services.filter(service=>service.profileId===profile.id);const chosen=serviceFor(profile.id);return <td key={profile.id}>{available.length?<><label className="compare-service-field"><span className="sr-only">Услуга для сравнения: {profile.name}</span><select className="select compare-service-select" aria-label={`Услуга для сравнения: ${profile.name}`} value={chosen?.id??''} onChange={event=>setServiceChoices(current=>({...current,[profile.id]:event.target.value}))}>{available.map(service=><option key={service.id} value={service.id}>{service.name}</option>)}</select></label>{chosen&&<b className="compare-service-price">{formatPrice(chosen.price)}</b>}</>:'Условия по запросу'}</td>})}</tr>
+    <tr><th scope="row">Город</th>{comparedProfiles.map(profile=><td key={profile.id}>{cityName(profile.city)}</td>)}</tr>
+    <tr><th scope="row">Выезд</th>{comparedProfiles.map(profile=><td key={profile.id}>{travelLabel(profile)}</td>)}</tr>
+    <tr><th scope="row">Цена профиля</th>{comparedProfiles.map(profile=><td key={profile.id}><b>{formatPrice(profile.price)}</b></td>)}</tr>
+    <tr><th scope="row">Рейтинг</th>{comparedProfiles.map(profile=><td key={profile.id}><b>{profile.rating.toFixed(1)}</b> / 5</td>)}</tr>
+    <tr><th scope="row">Отзывы и проекты</th>{comparedProfiles.map(profile=><td key={profile.id}>{reviews.filter(review=>review.profileId===profile.id).length} отзывов · {profile.projectIds.length} проектов</td>)}</tr>
+    <tr><th scope="row">Проверка профиля</th>{comparedProfiles.map(profile=><td key={profile.id}>{profile.verified?'Проверен в demo':'Без отметки demo'}</td>)}</tr>
+    <tr><th scope="row">Следующий шаг</th>{comparedProfiles.map(profile=>{const service=serviceFor(profile.id);return <td key={profile.id}><div className="row wrap"><Link className="button" href={'/profiles/'+profile.slug}>Профиль</Link><button className="button pro" onClick={()=>app.open('contact',{profileId:profile.id,serviceId:service?.id,intent:'booking'})}>Записаться</button></div></td>})}</tr>
+  </tbody></table></div>
+}
+
 function Subscriptions(){
   const app=useApp()
   const [ids,setIds]=useState<string[]>(['anna-mironova-photo','loft-bereg'])
@@ -251,17 +273,7 @@ function Subscriptions(){
   const suggested=profiles.filter(profile=>!ids.includes(profile.id)&&profile.city===app.city).slice(0,4)
   return <div className="container page subscriptions-page"><div className="eyebrow">Профиль Viewer</div><div className="between wrap"><div><h1>Подписки</h1><p className="lede">Следите за профессионалами и командами, чьи проекты хотите видеть в ленте.</p></div><Link className="button" href="/recommendations">Рекомендации <ArrowRight size={16}/></Link></div><section className="section"><div className="section-head"><div><h2>Вы подписаны</h2><p className="meta">Выберите до трёх профилей, чтобы сравнить условия рядом.</p></div><span className="meta">{idsReady?list.length:'—'}</span></div>{!idsReady?<div className="page-loading" role="status" aria-busy="true">Восстанавливаем подписки…</div>:list.length?<div className="grid">{list.map(profile=><div key={profile.id}><ProfileCard profile={profile}/><div className="row subscription-card-actions"><button className={'button subscription-toggle '+(compared.includes(profile.id)?'selected':'')} aria-pressed={compared.includes(profile.id)} disabled={!comparisonReady} onClick={()=>toggleComparison(profile.id)}>{compared.includes(profile.id)?'В сравнении':'Сравнить'}</button><button className="button subscription-toggle" onClick={()=>toggle(profile.id)}>Отписаться</button></div></div>)}</div>:<div className="empty"><h3>Подписок пока нет</h3><p>Откройте рекомендации и подпишитесь на подходящие профили.</p><Link className="button primary" href="/recommendations">Найти профили</Link></div>}</section>{compareList.length>=2&&<section className="section subscription-comparison" aria-labelledby="subscription-comparison-title">
   <div className="section-head"><div><div className="eyebrow">Решение</div><h2 id="subscription-comparison-title">Сравнение условий</h2><p className="meta">Сравните услугу, цену, географию и отзывы перед обращением.</p></div><button className="button" onClick={()=>setCompared([])}>Очистить</button></div>
-  <div className="card compare-table-wrap"><table className="compare-table"><thead><tr><th scope="col">Параметр</th>{compareList.map(profile=><th scope="col" key={profile.id}>{profile.name}</th>)}</tr></thead><tbody>
-    <tr><th scope="row">Специализация</th>{compareList.map(profile=><td key={profile.id}>{profile.specialty} · {profile.subcategory}</td>)}</tr>
-    <tr><th scope="row">Основная услуга</th>{compareList.map(profile=>{const service=services.find(item=>item.profileId===profile.id);return <td key={profile.id}>{service?<><b>{service.name}</b><br/><span className="meta">{formatPrice(service.price)}</span></>:'Условия по запросу'}</td>})}</tr>
-    <tr><th scope="row">Город</th>{compareList.map(profile=><td key={profile.id}>{cityName(profile.city)}</td>)}</tr>
-    <tr><th scope="row">Выезд</th>{compareList.map(profile=><td key={profile.id}>{profile.travel==='nearby'?'До 80 км':profile.travel==='countrywide'?'По России':profile.travel==='international'?'Международный':profile.travel==='remote'?'Онлайн':'В городе'}</td>)}</tr>
-    <tr><th scope="row">Цена профиля</th>{compareList.map(profile=><td key={profile.id}><b>{formatPrice(profile.price)}</b></td>)}</tr>
-    <tr><th scope="row">Рейтинг</th>{compareList.map(profile=><td key={profile.id}><b>{profile.rating.toFixed(1)}</b> / 5</td>)}</tr>
-    <tr><th scope="row">Отзывы и проекты</th>{compareList.map(profile=><td key={profile.id}>{reviews.filter(review=>review.profileId===profile.id).length} отзывов · {profile.projectIds.length} проектов</td>)}</tr>
-    <tr><th scope="row">Проверка профиля</th>{compareList.map(profile=><td key={profile.id}>{profile.verified?'Проверен в demo':'Без отметки demo'}</td>)}</tr>
-    <tr><th scope="row">Следующий шаг</th>{compareList.map(profile=>{const service=services.find(item=>item.profileId===profile.id);return <td key={profile.id}><div className="row wrap"><Link className="button" href={'/profiles/'+profile.slug}>Профиль</Link><button className="button pro" onClick={()=>app.open('contact',{profileId:profile.id,serviceId:service?.id,intent:'booking'})}>Записаться</button></div></td>})}</tr>
-  </tbody></table></div>
+  <ProfileComparisonTable profiles={compareList}/>
 </section>}<section className="section"><div className="section-head"><div><div className="eyebrow">Рядом</div><h2>Кого можно добавить</h2></div></div><div className="grid">{suggested.map(profile=><div key={profile.id}><ProfileCard profile={profile}/><button className="button pro subscription-toggle" onClick={()=>toggle(profile.id)}>Подписаться</button></div>)}</div></section></div>
 }
 
@@ -283,17 +295,7 @@ function FavoritesPro(){
       <div className="grid">{list.map(profile=><div key={profile.id}><ProCatalogCard profile={profile}/><div className="row subscription-card-actions"><button className={'button subscription-toggle '+(compared.includes(profile.id)?'selected':'')} aria-pressed={compared.includes(profile.id)} disabled={!comparisonReady} onClick={()=>toggleComparison(profile.id)}>{compared.includes(profile.id)?'В сравнении':'Сравнить'}</button><button className="button favorite-toggle" onClick={()=>toggle(profile.id)}><BookmarkSimple size={16}/> Убрать</button></div></div>)}</div>
       {compareList.length>=2&&<section className="section subscription-comparison" aria-labelledby="pro-comparison-title">
         <div className="section-head"><div><div className="eyebrow">PRO shortlist</div><h2 id="pro-comparison-title">Сравнение кандидатов</h2><p className="meta">Сравните услуги и условия: цена, город, выезд и доверительные сигналы.</p></div><button className="button" onClick={()=>setCompared([])}>Очистить</button></div>
-        <div className="card compare-table-wrap"><table className="compare-table"><thead><tr><th scope="col">Параметр</th>{compareList.map(profile=><th scope="col" key={profile.id}>{profile.name}</th>)}</tr></thead><tbody>
-          <tr><th scope="row">Специализация</th>{compareList.map(profile=><td key={profile.id}>{profile.specialty} · {profile.subcategory}</td>)}</tr>
-          <tr><th scope="row">Основная услуга</th>{compareList.map(profile=>{const service=services.find(item=>item.profileId===profile.id);return <td key={profile.id}>{service?<><b>{service.name}</b><br/><span className="meta">{formatPrice(service.price)}</span></>:'Условия по запросу'}</td>})}</tr>
-          <tr><th scope="row">Город</th>{compareList.map(profile=><td key={profile.id}>{cityName(profile.city)}</td>)}</tr>
-          <tr><th scope="row">Выезд</th>{compareList.map(profile=><td key={profile.id}>{profile.travel==='nearby'?'До 80 км':profile.travel==='countrywide'?'По России':profile.travel==='international'?'Международный':'В городе'}</td>)}</tr>
-          <tr><th scope="row">Цена профиля</th>{compareList.map(profile=><td key={profile.id}><b>{formatPrice(profile.price)}</b></td>)}</tr>
-          <tr><th scope="row">Рейтинг</th>{compareList.map(profile=><td key={profile.id}><b>{profile.rating.toFixed(1)}</b> / 5</td>)}</tr>
-          <tr><th scope="row">Отзывы и проекты</th>{compareList.map(profile=><td key={profile.id}>{reviews.filter(review=>review.profileId===profile.id).length} отзывов · {profile.projectIds.length} проектов</td>)}</tr>
-          <tr><th scope="row">Проверка профиля</th>{compareList.map(profile=><td key={profile.id}>{profile.verified?'Проверен в demo':'Без отметки demo'}</td>)}</tr>
-          <tr><th scope="row">Следующий шаг</th>{compareList.map(profile=>{const service=services.find(item=>item.profileId===profile.id);return <td key={profile.id}><div className="row wrap"><Link className="button" href={'/profiles/'+profile.slug}>Профиль</Link><button className="button pro" onClick={()=>app.open('contact',{profileId:profile.id,serviceId:service?.id,intent:'booking'})}>Записаться</button></div></td>})}</tr>
-        </tbody></table></div>
+        <ProfileComparisonTable profiles={compareList}/>
       </section>}
     </>:<div className="empty section"><h2>Избранное PRO пусто</h2><p>Сохраняйте профессионалов из каталога, чтобы сравнить их позже.</p><Link className="button primary" href="/pro">Перейти в PRO</Link></div>}
   </div>
