@@ -27,11 +27,64 @@ test('визуал → проект → команда → услуга → ло
  await expect(page.getByText('Demo-заявка сохранена')).toBeVisible();
  const savedRequest=await page.evaluate(()=>JSON.parse(localStorage.getItem('chereda-requests')||'[]').at(-1));
  expect(savedRequest).toMatchObject({profileName:'Елена Соколова',contactName:'Тестовый Viewer',preferredChannel:'telegram',contactValue:'@demo_chereda',serviceName:'Укладка + проба',message:'Нужна укладка для свадьбы.'});
- await page.getByRole('dialog').getByText('Закрыть',{exact:true}).click();
+ await page.getByRole('dialog').getByRole('link',{name:'Открыть мои заявки'}).click();
+ await expect(page).toHaveURL(/\/me\/?\?tab=requests/);
+ await expect(page.getByRole('heading',{name:'Мои demo-заявки'})).toBeVisible();
+ const requestCard=page.locator('.viewer-request-card').first();
+ await expect(requestCard).toContainText('Елена Соколова');
+ await expect(requestCard).toContainText('Укладка + проба');
+ await expect(requestCard).toContainText('Нужна укладка для свадьбы.');
+ await expect(requestCard).toContainText('@demo_chereda');
+ await page.reload();
+ await expect(page.locator('.viewer-request-card')).toHaveCount(1);
+ await requestCard.getByRole('link',{name:'Открыть профиль'}).click();
+ await expect(page.getByRole('heading',{name:'Елена Соколова'})).toBeVisible();
  await page.getByRole('button',{name:'Записаться'}).first().click();
  await expect(page.getByRole('textbox',{name:'Ваше имя'})).toHaveValue('');
  await expect(page.getByRole('textbox',{name:'Контакт для ответа'})).toHaveValue('');
  await expect(page.getByRole('textbox',{name:'Сообщение'})).toHaveValue('');
+});
+
+test('журнал локальных заявок имеет понятное пустое состояние и продолжение пути',async({page})=>{
+ await page.goto('/me?tab=requests');
+ await expect(page.getByRole('heading',{name:'Мои demo-заявки'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Заявок пока нет'})).toBeVisible();
+ await page.getByRole('link',{name:'Открыть PRO-каталог'}).click();
+ await expect(page).toHaveURL(/\/pro\/?$/);
+});
+
+test('заявки восстанавливаются в мобильной тёмной теме, повреждённый список можно сбросить',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Тёмная'}).click();
+ await page.evaluate(()=>localStorage.setItem('chereda-requests',JSON.stringify([{profileId:'anna-mironova-photo',profileName:'Анна Миронова',serviceName:'Фотосъёмка события',eventCity:'moscow',contactName:'Демо Viewer',preferredChannel:'email',contactValue:'viewer@example.com',message:'Проверка мобильной заявки.',date:'2026-11-13T09:00:00.000Z'}])));
+ await page.goto('/me?tab=requests');
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ const geometry=await page.locator('.viewer-request-card').evaluate(el=>({width:el.getBoundingClientRect().width,scroll:document.documentElement.scrollWidth,viewport:innerWidth}));
+ expect(geometry.width).toBeLessThanOrEqual(geometry.viewport);
+ expect(geometry.scroll).toBeLessThanOrEqual(geometry.viewport);
+ await page.evaluate(()=>localStorage.setItem('chereda-requests','{'));
+ await page.reload();
+ const recovery=page.getByRole('alert');
+ await expect(recovery.getByRole('heading',{name:'Не удалось прочитать локальные заявки'})).toBeVisible();
+ await recovery.getByRole('button',{name:'Сбросить повреждённый список'}).click();
+ await expect(page.getByRole('heading',{name:'Заявок пока нет'})).toBeVisible();
+});
+
+test('ошибка локального сохранения заявки оставляет форму доступной для повтора',async({page})=>{
+ await page.addInitScript(()=>{
+  const original=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(key,value){if(key==='chereda-requests')throw new DOMException('Storage full','QuotaExceededError');return original.call(this,key,value)};
+ });
+ await page.goto('/profiles/anna-mironova-photo');
+ await page.getByRole('button',{name:'Записаться'}).first().click();
+ const form=page.getByRole('dialog',{name:'Записаться к специалисту'});
+ await form.getByRole('textbox',{name:'Ваше имя'}).fill('Демо Viewer');
+ await form.getByRole('textbox',{name:'Контакт для ответа'}).fill('viewer@example.com');
+ await form.getByRole('textbox',{name:'Сообщение'}).fill('Проверка восстановления после ошибки.');
+ await form.getByRole('button',{name:'Сохранить demo-заявку'}).click();
+ await expect(form.getByRole('alert')).toContainText('Не удалось сохранить заявку');
+ await expect(form.getByRole('button',{name:'Сохранить demo-заявку'})).toBeEnabled();
 });
 
 test('лента показывает темы по горизонтальной ленте, не растягивая её за контейнер',async({page})=>{
