@@ -4,6 +4,7 @@ import {useEffect,useState} from 'react'
 import Link from 'next/link'
 import {ArrowRight,CalendarBlank,ChatCircle,MapPin,UsersThree} from '@phosphor-icons/react'
 import {cityName} from '@/data/catalog'
+import {readBrowserValue} from '@/data/browser-storage'
 import {profiles,projects,services} from '@/data/seed'
 
 type ViewerRequest={
@@ -13,7 +14,7 @@ type ViewerRequest={
 }
 
 function readRequests(){
- const raw=localStorage.getItem('chereda-requests')
+ const raw=readBrowserValue('chereda-requests')
  if(!raw)return [] as ViewerRequest[]
  const parsed:unknown=JSON.parse(raw)
  if(!Array.isArray(parsed))throw new Error('invalid-request-list')

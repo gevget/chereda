@@ -3,13 +3,13 @@
 import {useEffect,useState} from 'react';
 import {useApp} from '@/components/navigation/app-shell';
 import {LucideBookmark} from '@/components/icons/lucide';
-import {writeBrowserValue} from '@/data/browser-storage';
+import {readBrowserValue,writeBrowserValue} from '@/data/browser-storage';
 
 const key='chereda-favorites-pro';
 
 function readFavorites(){
   try{
-    const parsed=JSON.parse(localStorage.getItem(key)||'[]');
+    const parsed=JSON.parse(readBrowserValue(key)||'[]');
     return Array.isArray(parsed)?parsed.filter((id):id is string=>typeof id==='string'):[];
   }catch{return []}
 }

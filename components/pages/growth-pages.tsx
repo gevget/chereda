@@ -7,12 +7,12 @@ import {cities,cityName} from '@/data/catalog';
 import {creditsFor,profiles,projects,projectBySlug,profileBySlug} from '@/data/seed';
 import {partnerHub,radarRows,teamMatch,venueFit,visualBriefSeed} from '@/data/growth';
 import {useApp} from '@/components/navigation/app-shell';
-import {writeBrowserValue} from '@/data/browser-storage';
+import {readBrowserValue,writeBrowserValue} from '@/data/browser-storage';
 
 type Brief={id:string;title:string;city:string;guests:string;budget:string;style:string;market:'RU'|'EU'};
 type GrowthState={version:1;brief?:Brief;rooms:Record<string,string>;boards:Record<string,Record<string,string[]>>;requests:Record<string,string>;crew:string[]};
 const KEY='chereda-growth-v1';const EMPTY:GrowthState={version:1,rooms:{},boards:{},requests:{},crew:[]};
-function useGrowth(){const [state,setState]=useState(EMPTY);const [ready,setReady]=useState(false);useEffect(()=>{queueMicrotask(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const value=JSON.parse(raw) as GrowthState;if(value.version===1)setState({...EMPTY,...value})}}catch{}setReady(true)})},[]);useEffect(()=>{if(ready)writeBrowserValue(KEY,JSON.stringify(state))},[ready,state]);return {state,patch:(fn:(v:GrowthState)=>GrowthState)=>setState(v=>fn(v))}}
+function useGrowth(){const [state,setState]=useState(EMPTY);const [ready,setReady]=useState(false);useEffect(()=>{queueMicrotask(()=>{try{const raw=readBrowserValue(KEY);if(raw){const value=JSON.parse(raw) as GrowthState;if(value.version===1)setState({...EMPTY,...value})}}catch{}setReady(true)})},[]);useEffect(()=>{if(ready)writeBrowserValue(KEY,JSON.stringify(state))},[ready,state]);return {state,patch:(fn:(v:GrowthState)=>GrowthState)=>setState(v=>fn(v))}}
 function Intro({eyebrow,title,lede,children}:{eyebrow:string;title:string;lede:string;children?:React.ReactNode}){return <div className="growth-intro"><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p className="lede">{lede}</p>{children&&<div className="row wrap">{children}</div>}</div>}
 function Go({href,children,primary=false}:{href:string;children:React.ReactNode;primary?:boolean}){return <Link className={primary?'button primary':'button'} href={href}>{children}<ArrowRight size={16}/></Link>}
 function Note({children}:{children:React.ReactNode}){return <p className="growth-disclaimer"><span className="badge">Demo preview</span>{children}</p>}

@@ -3,13 +3,13 @@
 import {useEffect,useState} from 'react';
 import {useApp} from '@/components/navigation/app-shell';
 import {LucideUserPlus} from '@/components/icons/lucide';
-import {writeBrowserValue} from '@/data/browser-storage';
+import {readBrowserValue,writeBrowserValue} from '@/data/browser-storage';
 
 const key='chereda-subscriptions';
 
 function readSubscriptions(){
   try{
-    const parsed=JSON.parse(localStorage.getItem(key)||'[]');
+    const parsed=JSON.parse(readBrowserValue(key)||'[]');
     return Array.isArray(parsed)?parsed.filter((id):id is string=>typeof id==='string'):[];
   }catch{return []}
 }

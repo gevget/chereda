@@ -454,14 +454,22 @@ test('запрет browser storage не ломает подписку и чес�
  await page.addInitScript(()=>{Storage.prototype.setItem=function(){throw new DOMException('Storage is unavailable','QuotaExceededError')}});
  const pageErrors:string[]=[];
  page.on('pageerror',error=>pageErrors.push(error.message));
+ page.on('console',message=>{if(message.type()==='error')pageErrors.push(message.text())});
  await page.goto('/search?tab=profiles');
+ const profileName=await page.locator('.profile-card .profile-card-name a').first().innerText();
  const button=page.locator('.profile-card .subscription-card-button').first();
  await button.click();
  await expect(button).toHaveAttribute('aria-pressed','true');
  await expect(page.getByRole('status')).toContainText('только до закрытия вкладки');
- await button.click();
- await expect(button).toHaveAttribute('aria-pressed','false');
- await expect(page.getByRole('status')).toContainText('Подписка снята');
+ await page.getByRole('button',{name:'Меню профиля'}).click();
+ await page.getByRole('dialog',{name:'Меню Chereda'}).getByRole('link',{name:'Подписки'}).click();
+ const subscribedEntry=page.locator('.profile-card').filter({hasText:profileName}).first();
+ await expect(subscribedEntry).toBeVisible();
+ await subscribedEntry.locator('xpath=..').getByRole('button',{name:'Отписаться',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Подписок пока нет'})).toBeVisible();
+ await page.goBack();
+ const restoredButton=page.locator('.profile-card').filter({hasText:profileName}).locator('.subscription-card-button');
+ await expect(restoredButton).toHaveAttribute('aria-pressed','false');
  expect(pageErrors).toEqual([]);
 });
 
