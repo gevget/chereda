@@ -760,3 +760,6 @@ body{font-family:'Roboto Flex Variable','Roboto Flex',Roboto,Arial,sans-serif}
 
 .viewer-request-list{display:grid;gap:12px}.viewer-request-card{display:grid;gap:12px}.viewer-request-card h3{margin:0}.viewer-request-card .eyebrow{margin-bottom:4px}.viewer-request-service,.viewer-request-message{margin:0}.viewer-request-facts{display:flex;flex-wrap:wrap;gap:10px 16px;color:var(--text-secondary)}.viewer-request-facts span{display:inline-flex;align-items:center;gap:6px;min-width:0}.viewer-request-facts svg{flex:none;color:var(--brand-pro)}.viewer-request-links{padding-top:4px;gap:10px}.form-error{margin:4px 0 0;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--danger,#c12d44) 10%,var(--bg-surface));color:var(--danger,#c12d44);font-size:13px}
 @media(max-width:767px){.viewer-request-facts{display:grid;gap:10px}.viewer-request-links>.button{flex:1}}
+
+.discard-confirm{display:grid;gap:10px;margin:0 0 16px;padding:16px;border:1px solid var(--border-strong);border-radius:14px;background:var(--bg-subtle)}.discard-confirm h3,.discard-confirm p{margin:0}.discard-confirm .row{gap:10px}
+@media(max-width:540px){.discard-confirm .row>.button{flex:1;min-width:0;white-space:normal;line-height:1.3}}

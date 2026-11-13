@@ -87,6 +87,37 @@ test('ошибка локального сохранения заявки ост
  await expect(form.getByRole('button',{name:'Сохранить demo-заявку'})).toBeEnabled();
 });
 
+test('незаполненная до конца заявка просит подтверждение перед закрытием',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Тёмная'}).click();
+ await page.goto('/profiles/anna-mironova-photo');
+ await page.getByRole('button',{name:'Записаться'}).first().click();
+ const form=page.getByRole('dialog',{name:'Записаться к специалисту'});
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ const dialogBounds=await form.evaluate(el=>({left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,scroll:document.documentElement.scrollWidth,viewport:innerWidth}));
+ expect(dialogBounds.left).toBeGreaterThanOrEqual(0);
+ expect(dialogBounds.right).toBeLessThanOrEqual(dialogBounds.viewport);
+ expect(dialogBounds.scroll).toBeLessThanOrEqual(dialogBounds.viewport);
+ await form.getByRole('textbox',{name:'Ваше имя'}).fill('Черновик Viewer');
+ await form.getByRole('button',{name:'Закрыть'}).click();
+ const confirm=page.getByRole('alert').filter({has:page.getByRole('heading',{name:'Отказаться от заполнения?'})});
+ await expect(confirm).toBeVisible();
+ await expect(confirm.getByRole('button',{name:'Продолжить заполнение'})).toBeFocused();
+ await expect(form.getByRole('textbox',{name:'Ваше имя'})).toHaveValue('Черновик Viewer');
+ await page.keyboard.press('Escape');
+ await expect(confirm).toHaveCount(0);
+ await expect(form.getByRole('button',{name:'Закрыть'})).toBeFocused();
+ await form.getByRole('textbox',{name:'Сообщение'}).fill('Нужно обсудить дату и условия события.');
+ await page.locator('.overlay').click({position:{x:5,y:5}});
+ await expect(confirm).toBeVisible();
+ await confirm.getByRole('button',{name:'Продолжить заполнение'}).click();
+ await expect(form.getByRole('textbox',{name:'Сообщение'})).toHaveValue('Нужно обсудить дату и условия события.');
+ await form.getByRole('button',{name:'Закрыть'}).click();
+ await form.getByRole('button',{name:'Закрыть без сохранения'}).click();
+ await expect(form).toHaveCount(0);
+});
+
 test('лента показывает темы по горизонтальной ленте, не растягивая её за контейнер',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  await page.goto('/feed');
