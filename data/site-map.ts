@@ -62,7 +62,6 @@ export const buildSiteMap=(collections:Collection[]=initialCollections):SiteMapS
     {title:'Системные состояния',description:'Экран загрузки, пустого результата, ошибки и отсутствующего маршрута.',entries:[
       page('/demo','Demo hub','Переходы и состояния для презентации'),
       page('/offline','Offline','Локальный offline-сценарий'),
-      page('/404','Страница не найдена','Доступный preview системного состояния'),
       page('/error','Ошибка','Доступный preview состояния ошибки')
     ].map(entry=>({...entry,kind:'system' as const}))}
   ];

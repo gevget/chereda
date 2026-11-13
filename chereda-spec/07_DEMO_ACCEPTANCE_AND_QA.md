@@ -72,7 +72,7 @@ Investor demo считается готовым не тогда, когда ст
 | `/settings` | 1 | ✓ | n/a | n/a | storage error | ✓ | ✓ |
 | `/about` | 0 | ✓ | media skeleton | n/a | media fallback | ✓ | ✓ |
 | `/demo` | 0 | ✓ | n/a | n/a | reset error | ✓ | ✓ |
-| `/404` | 1 | ✓ | n/a | n/a | n/a | ✓ | ✓ |
+| Неизвестный маршрут (404) | 1 | ✓ | n/a | n/a | n/a | ✓ | ✓ |
 
 ## 4. Visual QA
 

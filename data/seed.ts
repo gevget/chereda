@@ -52,8 +52,9 @@ const createDemoAvatar=(name:string,index:number)=>{
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320"><rect width="320" height="320" rx="160" fill="#f1eee9"/><circle cx="${accentX}" cy="${accentY}" r="${accentRadius}" fill="#e63462" opacity=".12"/><path d="M42 278c28-36 56-54 84-54s56 18 84 54" fill="none" stroke="#3c1642" stroke-opacity=".14" stroke-width="2"/><text x="160" y="174" text-anchor="middle" dominant-baseline="middle" fill="#3c1642" font-family="Roboto Flex,Arial,sans-serif" font-size="82" font-weight="560">${initials}</text></svg>`;
  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
-// Keep demo galleries visually coherent by event type. Each project owns a
-// stable set of local stock assets instead of interleaving unrelated events.
+// Prefer distinct, event-relevant existing photos for project covers. The
+// remaining frames use project-specific local illustrations so projects never
+// borrow the same photograph or depend on a remote image service.
 const projectMediaSets:Record<string,number[]>={
  'свадьба':[1,2,3,4,13,14,16,10],
  'презентация бренда':[5,6,7,9,11,12,15,8],
@@ -66,6 +67,7 @@ const projectMediaSets:Record<string,number[]>={
  'детское событие':[1,2,3,13,14,16,10,4],
  'корпоратив':[5,8,9,10,11,15,6,3]
 };
+const usedProjectPhotos=new Set<number>();
 const surnameStems=['Лазарев','Комаров','Беляев','Назаров','Сергеев','Федоров','Крылов','Захаров','Макаров','Громов','Сафин','Егоров','Орлов','Титов','Гусев','Елисеев','Котов','Романов'];
 const names=['Нина','Павел','Вера','Артём','Юлия','Денис','Мария','Олег','Ксения','Михаил','Алина','Кирилл','Татьяна','Роман','Ева','Лев','Полина','Игорь'];
 export const profiles:Profile[]=heroRows.map(([slug,name,type,category,specialty,city,amount,unit],i)=>({id:slug,slug,name,type,category,subcategory:slug==='loft-bereg'?'Свадебные':slug==='sever-hall'?'Бизнес-площадки':slug==='elena-sokolova-hair'?'Стилисты по волосам':categories.find(c=>c.slug===category)!.subcategories[0],specialty,city,travel:type==='venue'?'local':slug==='elena-sokolova-hair'?'nearby':i%4===0?'countrywide':'local',price:slug==='sever-hall'?{kind:'request',currency:'RUB',unit}:slug==='daria-volkova-producer'?{kind:'range',from:180000,to:280000,currency:'RUB',unit}:p(amount,unit,city==='astana'?'KZT':city==='dubai'?'AED':'RUB'),bio:`${name} — ${specialty.toLowerCase()} для событий с продуманной эстетикой. В demo показаны услуги, условия работы и участие в общих проектах.`,styles:['editorial','botanical','современный'],verified:i%5!==2,rating:4.3+(i%7)*0.1,score:72000+i*1173,rank:i+1,capacity:slug==='loft-bereg'?150:slug==='sever-hall'?220:undefined,outsideCatering:type==='venue'?true:undefined,parkingSpaces:type==='venue'?(slug==='loft-bereg'?48:120):undefined,equipment:type==='venue'?['свет','звук','мебель','Wi‑Fi']:undefined,kitchen:type==='venue'?(slug==='loft-bereg'?'prep':'own'):undefined,accessibility:type==='venue'?['безбарьерный вход','лифт','санузел']:undefined,outdoor:type==='venue',accommodation:slug==='loft-bereg',venueType:type==='venue'?(slug==='loft-bereg'?'Лофт':'Бизнес-площадка'):undefined,catalogTags:type==='venue'?['Установка авто','Служебный вход','звуковое оборудование (да или нет)','Световое оборудование (да или нет)','Проекторы и экраны ( да или нет)']:['Есть фото','Есть Отзывы','Есть записи в портфолио'],projectIds:[],serviceIds:[],avatar:i<stockAvatarPool.length?stockAvatarPool[i]:createDemoAvatar(name,i),cover:i<stockCoverPool.length?stockCoverPool[i]:assetPath(`/media/covers/cover-${String(i+1).padStart(2,'0')}.svg`)}));
@@ -83,7 +85,9 @@ projectRows.forEach(([slug,title,eventType,city,styles],i)=>{
  const pcredits=unique.map(([profileId,roleLabel,contribution],j):Credit=>({id:`credit-${i+1}-${j+1}`,projectId:slug,profileId,roleLabel,contribution,categoryId:profiles.find(p=>p.id===profileId)!.category,serviceIds:[profiles.find(p=>p.id===profileId)!.serviceIds[0]],isLead:j===0,creditOrder:j+1,confirmed:true}));
  credits.push(...pcredits);
  const mediaSet=projectMediaSets[eventType]??projectMediaSets['частное событие'];
- const pmedia=Array.from({length:8},(_,j):Media=>({id:`media-${i+1}-${j+1}`,projectId:slug,src:stockProjectPool[mediaSet[j]-1],alt:`Демонстрационная композиция проекта «${title}», кадр ${j+1}: пространство и детали события`,caption:['Общий план','Детали пространства','Подготовка','Встреча гостей','Атмосфера вечера','Команда в работе','Детали сервировки','Финальный свет'][j],isDemoContent:true}));
+ const photo=mediaSet.find(n=>!usedProjectPhotos.has(n));
+ if(photo)usedProjectPhotos.add(photo);
+ const pmedia=Array.from({length:8},(_,j):Media=>({id:`media-${i+1}-${j+1}`,projectId:slug,src:j===0&&photo?stockProjectPool[photo-1]:assetPath(`/media/projects/project-${String(i+1).padStart(2,'0')}-${String(j+1).padStart(2,'0')}.svg`),alt:`Демонстрационный визуал проекта «${title}», кадр ${j+1}: ${j===0?'пространство события':'авторская иллюстрация Chereda'}`,caption:['Общий план','Детали пространства','Подготовка','Встреча гостей','Атмосфера вечера','Команда в работе','Детали сервировки','Финальный свет'][j],isDemoContent:true}));
  media.push(...pmedia);
  projects.push({id:slug,slug,title,description:i===0?'Камерная городская свадьба на 86 гостей. Светлая ботаническая сценография, длинный общий стол, утренняя подготовка и вечерняя музыкальная программа. Каждый участник связан с единым проектом.':`${title} — демонстрационный ${eventType} в городе ${cities.find(c=>c.slug===city)?.name}. Пространство, команда и детали собраны в одном проекте.`,eventType,city,date:`2026-${String(i%9+1).padStart(2,'0')}-18`,styles,tags:[eventType,...styles],mediaIds:pmedia.map(m=>m.id),creditIds:pcredits.map(c=>c.id),leadProfileId:pcredits[0].profileId,reactions:83+i*17,saves:24+i*9,isDemoContent:true});
 });
