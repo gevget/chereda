@@ -472,10 +472,14 @@ test('подписки помогают сравнить условия и пе�
  await page.getByRole('button',{name:'Сравнить'}).nth(0).click();
  await expect(page.getByRole('heading',{name:'Сравнение условий'})).toBeVisible();
  await expect(page.locator('.compare-table')).toContainText('Цена');
+ await expect(page.locator('.compare-table')).toContainText('Основная услуга');
+ await expect(page.locator('.compare-table')).toContainText('Отзывы и проекты');
  await page.reload();
  await expect(page.getByRole('heading',{name:'Сравнение условий'})).toBeVisible();
+ const serviceName=await page.locator('.compare-table tbody tr').filter({hasText:'Основная услуга'}).locator('td').first().locator('b').innerText();
  await page.locator('.compare-table').getByRole('button',{name:'Записаться'}).first().click();
  await expect(page.getByRole('dialog',{name:'Записаться к специалисту'})).toBeVisible();
+ await expect(page.getByRole('dialog').locator('.booking-context')).toContainText(serviceName);
 });
 
 test('мобильное сравнение и форма записи остаются внутри экрана в тёмной теме',async({browser})=>{
