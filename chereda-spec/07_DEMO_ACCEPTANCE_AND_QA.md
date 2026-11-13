@@ -122,6 +122,7 @@ Investor demo считается готовым не тогда, когда ст
 - Tooltip появляется на hover и focus, закрывается Escape.
 - Popover не выходит за viewport.
 - Modal trap/restore focus работает.
+- Пока dialog открыт, фон не прокручивается; после закрытия возвращаются прежний scroll и фокус.
 - Mobile sheet учитывает safe-area и keyboard.
 - Toast не перекрывает navigation; Undo работает.
 - Mobile project action bar appears only after the project gallery rail leaves the viewport and stays above the mobile navigation.
