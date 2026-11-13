@@ -39,11 +39,22 @@ test('лента показывает темы по горизонтальной
  await page.goto('/feed');
  const rail=page.locator('.feed-page .story-rail');
  await expect(rail.locator('.story')).toHaveCount(8);
+ const projectCards=page.locator('.project-card-visual .media-link');
+ await expect(projectCards).toHaveCount(30);
+ const projectHrefs=await projectCards.evaluateAll(links=>links.map(link=>link.getAttribute('href')?.split('?')[0]));
+ expect(new Set(projectHrefs).size).toBe(projectHrefs.length);
  const geometry=await rail.evaluate(el=>({client:el.clientWidth,scroll:el.scrollWidth,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right}));
  expect(geometry.scroll).toBeGreaterThan(geometry.client);
  expect(geometry.left).toBeGreaterThanOrEqual(0);
  expect(geometry.right).toBeLessThanOrEqual(390);
  await expect(rail.locator('.story-avatar')).toHaveCount(8);
+});
+
+test('поиск использует настоящий заголовок и не обещает неподтверждённый объём каталога',async({page})=>{
+ await page.goto('/search');
+ await expect(page.getByRole('heading',{name:'Поиск Chereda',level:1})).toBeVisible();
+ await expect(page.getByText('Откройте проекты и специалистов творческой индустрии.')).toBeVisible();
+ await expect(page.getByText('Более 10 000 проектов из творческой среды')).toHaveCount(0);
 });
 
 test('повреждённое сохранённое состояние не ломает профиль и подписку',async({page})=>{

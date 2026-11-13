@@ -41,10 +41,8 @@ body{font-family:'Roboto Flex Variable','Roboto Flex',Arial,sans-serif;line-heig
 .page:has(.searchbar)>.hero:before{content:"";position:absolute;left:0;bottom:0;width:38%;height:100%;background:linear-gradient(90deg,rgba(237,238,240,.1),var(--bg-muted)),var(--hero-media) left bottom/cover no-repeat;filter:grayscale(1) contrast(1.1)}
 .page:has(.searchbar)>.hero .eyebrow,.page:has(.searchbar)>.hero h1,.page:has(.searchbar)>.hero p{position:relative;text-align:center;z-index:1;margin-left:auto;margin-right:auto}
 .page:has(.searchbar)>.hero .eyebrow{display:none}
-.page:has(.searchbar)>.hero h1{font-size:0;margin-top:0;margin-bottom:8px}
-.page:has(.searchbar)>.hero h1:after{content:'Поиск Chereda';font-size:36px;line-height:1.15;color:var(--text-primary)}
-.page:has(.searchbar)>.hero p{font-size:0;margin-bottom:0}
-.page:has(.searchbar)>.hero p:after{content:'Более 10 000 проектов из творческой среды';font-size:14px;line-height:1.45;color:var(--text-secondary)}
+.page:has(.searchbar)>.hero h1{font-size:36px;line-height:1.15;margin-top:0;margin-bottom:8px}
+.page:has(.searchbar)>.hero p{font-size:14px;line-height:1.45;margin-bottom:0}
 .page:has(.searchbar)>.hero .searchbar{position:absolute;left:80px;bottom:-84px;width:277px;z-index:2;max-width:none}
 .page:has(.searchbar)>.hero .searchbar .button{display:none}
 .page:has(.searchbar)>.rail.section{display:none}
@@ -76,7 +74,7 @@ body{font-family:'Roboto Flex Variable','Roboto Flex',Arial,sans-serif;line-heig
 .hero{border-radius:16px}
 @media(max-width:1599px){.feed-page .masonry{columns:5}}
 @media(max-width:1023px){.feed-page .masonry{columns:3}.page:has(.searchbar)>.hero{margin-left:-32px;margin-right:-32px;padding-left:32px;padding-right:32px}.page:has(.searchbar)>.hero .searchbar{left:32px}.page:has(.searchbar)>.hero:before{width:44%}}
-@media(max-width:767px){.header-inner{grid-template-columns:1fr auto;gap:8px}.header-tools{grid-column:2}.feed-page .masonry{columns:2}.feed-heading{display:block}.feed-heading h1{font-size:20px}.page:has(.searchbar)>.hero{margin-left:-16px;margin-right:-16px;margin-bottom:66px;min-height:250px;padding:70px 16px 24px}.page:has(.searchbar)>.hero:before{width:55%;opacity:.45}.page:has(.searchbar)>.hero h1{font-size:0}.page:has(.searchbar)>.hero h1:after{font-size:28px}.page:has(.searchbar)>.hero .searchbar{left:16px;bottom:-56px;width:calc(100% - 32px)}.page:has(.searchbar) .desktop-filter{display:grid;grid-template-columns:1fr 1fr;align-items:end;overflow:visible;transform:none;margin-bottom:0}.page:has(.searchbar) .filter-layout>div>.between{top:0}.page:has(.searchbar) .desktop-filter .field{min-width:0;flex-basis:auto}.page:has(.searchbar) .desktop-filter .button{grid-column:1/-1;width:100%}.page:has(.searchbar) .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.story-rail{gap:18px}.story-images{grid-template-columns:42px repeat(3,18px);width:100px;height:42px}.story-avatar{width:42px;height:42px}.story-images>img{width:18px;height:42px}}
+@media(max-width:767px){.header-inner{grid-template-columns:1fr auto;gap:8px}.header-tools{grid-column:2}.feed-page .masonry{columns:2}.feed-heading{display:block}.feed-heading h1{font-size:20px}.page:has(.searchbar)>.hero{margin-left:-16px;margin-right:-16px;margin-bottom:66px;min-height:250px;padding:70px 16px 24px}.page:has(.searchbar)>.hero:before{width:55%;opacity:.45}.page:has(.searchbar)>.hero h1{font-size:28px}.page:has(.searchbar)>.hero .searchbar{left:16px;bottom:-56px;width:calc(100% - 32px)}.page:has(.searchbar) .desktop-filter{display:grid;grid-template-columns:1fr 1fr;align-items:end;overflow:visible;transform:none;margin-bottom:0}.page:has(.searchbar) .filter-layout>div>.between{top:0}.page:has(.searchbar) .desktop-filter .field{min-width:0;flex-basis:auto}.page:has(.searchbar) .desktop-filter .button{grid-column:1/-1;width:100%}.page:has(.searchbar) .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.story-rail{gap:18px}.story-images{grid-template-columns:42px repeat(3,18px);width:100px;height:42px}.story-avatar{width:42px;height:42px}.story-images>img{width:18px;height:42px}}
 
 /* Поиск: ряд фильтров и предложения из исходного экрана. */
 .page:has(.searchbar)>.hero{margin-bottom:18px}
