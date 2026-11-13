@@ -4,6 +4,7 @@ test('визуал → проект → команда → услуга → ло
  await page.goto('/feed?tab=for-you');
  await page.getByRole('link',{name:'Белый сад',exact:true}).first().click();
  await expect(page.getByRole('heading',{name:'Белый сад'})).toBeVisible();
+ await expect.poll(()=>page.locator('.project-gallery img').evaluateAll(images=>images.filter(image=>(image as HTMLImageElement).naturalWidth>0).length)).toBe(5);
  const teamRecommendations=page.locator('.related-profile-grid .related-profile-reason');
  await expect(teamRecommendations.first()).toContainText('Стиль:');
  await expect(teamRecommendations.first()).toContainText(/Москва|Готов к выезду/);

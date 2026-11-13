@@ -44,6 +44,16 @@ const assetPath=(path:string)=>`${assetBasePath}${path}`;
 const stockAvatarPool=[1,2,3,4,5,6,7,8].map(n=>assetPath(`/media/stock/avatar-${String(n).padStart(2,'0')}.webp`));
 const stockCoverPool=[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>assetPath(`/media/stock/cover-${String(n).padStart(2,'0')}.webp`));
 const stockProjectPool=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].map(n=>assetPath(`/media/stock/project-${String(n).padStart(2,'0')}.webp`));
+const extraProjectMedia:Record<string,{src:string;alt:string;caption:string}[]>={
+ 'white-garden-wedding':[
+  {src:assetPath('/media/stock/project-01-02.webp'),alt:'Светлый зал, длинные столы и белая с зеленью цветочная композиция',caption:'Сервировка и флористика'},
+  {src:assetPath('/media/stock/project-01-03.webp'),alt:'Зал для ужина с подвесными светильниками и зеленью',caption:'Ботанический декор'},
+  {src:assetPath('/media/stock/project-01-04.webp'),alt:'Стилист помогает невесте подготовиться к свадебной церемонии',caption:'Утренняя подготовка'},
+  {src:assetPath('/media/stock/project-01-05.webp'),alt:'Нежная цветочная композиция под светлым тканевым шатром',caption:'Цветочная композиция'},
+  {src:assetPath('/media/stock/project-01-06.webp'),alt:'Свадебная церемония под деревянной аркой с цветами и белой тканью',caption:'Церемония под открытым небом'},
+  {src:assetPath('/media/stock/project-01-07.webp'),alt:'Стол для церемонии с зелёными свечами и цветочной композицией',caption:'Стол церемонии'}
+ ]
+};
 const createDemoAvatar=(name:string,index:number)=>{
  const initials=name.match(/[\p{L}\p{N}]+/gu)?.slice(0,2).map(part=>part[0]).join('').toLocaleUpperCase('ru-RU')||'CH';
  const accentX=42+((index*47)%236);
@@ -87,7 +97,7 @@ projectRows.forEach(([slug,title,eventType,city,styles],i)=>{
  const mediaSet=projectMediaSets[eventType]??projectMediaSets['частное событие'];
  const photo=mediaSet.find(n=>!usedProjectPhotos.has(n));
  if(photo)usedProjectPhotos.add(photo);
- const pmedia=Array.from({length:8},(_,j):Media=>({id:`media-${i+1}-${j+1}`,projectId:slug,src:j===0&&photo?stockProjectPool[photo-1]:assetPath(`/media/projects/project-${String(i+1).padStart(2,'0')}-${String(j+1).padStart(2,'0')}.svg`),alt:`Демонстрационный визуал проекта «${title}», кадр ${j+1}: ${j===0?'пространство события':'авторская иллюстрация Chereda'}`,caption:['Общий план','Детали пространства','Подготовка','Встреча гостей','Атмосфера вечера','Команда в работе','Детали сервировки','Финальный свет'][j],isDemoContent:true}));
+ const pmedia=Array.from({length:8},(_,j):Media=>{const extra=extraProjectMedia[slug]?.[j-1];return{id:`media-${i+1}-${j+1}`,projectId:slug,src:j===0&&photo?stockProjectPool[photo-1]:extra?.src??assetPath(`/media/projects/project-${String(i+1).padStart(2,'0')}-${String(j+1).padStart(2,'0')}.svg`),alt:j===0?`Демонстрационная фотография события «${eventType}»`:extra?.alt??`Демонстрационный визуал проекта «${title}», кадр ${j+1}: авторская иллюстрация Chereda`,caption:j===0?'Общий план':extra?.caption??['','Детали пространства','Подготовка','Встреча гостей','Атмосфера вечера','Команда в работе','Детали сервировки','Финальный свет'][j],isDemoContent:true}});
  media.push(...pmedia);
  projects.push({id:slug,slug,title,description:i===0?'Камерная городская свадьба на 86 гостей. Светлая ботаническая сценография, длинный общий стол, утренняя подготовка и вечерняя музыкальная программа. Каждый участник связан с единым проектом.':`${title} — демонстрационный ${eventType} в городе ${cities.find(c=>c.slug===city)?.name}. Пространство, команда и детали собраны в одном проекте.`,eventType,city,date:`2026-${String(i%9+1).padStart(2,'0')}-18`,styles,tags:[eventType,...styles],mediaIds:pmedia.map(m=>m.id),creditIds:pcredits.map(c=>c.id),leadProfileId:pcredits[0].profileId,reactions:83+i*17,saves:24+i*9,isDemoContent:true});
 });

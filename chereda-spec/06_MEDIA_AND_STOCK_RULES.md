@@ -236,3 +236,18 @@ venue-loft-bereg-cover.webp
 - невозможно сохранить source URL и автора;
 - качество недостаточно для заданного размера.
 
+## 16. Дополнения к галерее «Белый сад» (2026-11-13)
+
+В галерею главного свадебного demo-проекта добавлены локальные кадры Unsplash. Каждый кадр помечен как demo-stock, связан только с `white-garden-wedding`, хранит источник, автора, лицензию, размеры и alt в `public/media/manifest.json`; приложение использует локальный WebP-файл без сетевого запроса при просмотре.
+
+| Кадр | Автор | Источник | Контекст |
+|---|---|---|---|
+| 2 | Thomas Beaman | <https://unsplash.com/photos/a-table-set-for-a-formal-dinner-with-white-flowers-and-greenery-ufpn_xkqlss> | Светлый зал и бело-зелёная флористика |
+| 3 | Andreea Avramescu | <https://unsplash.com/photos/bohemian-wedding-reception-decor-with-hanging-lights-and-plants-kDcSx6Cqs0w> | Зелень и подвесной свет |
+| 4 | Alexander Mass | <https://unsplash.com/photos/bride-getting-hair-styled-before-wedding-oJ9JC4wwFBY> | Утренняя подготовка образа |
+| 5 | Karen Cann | <https://unsplash.com/photos/a-large-bouquet-of-flowers-on-a-table-qoEl30StL3A> | Цветочная композиция |
+| 6 | Khrystyna Shevtsiv | <https://unsplash.com/photos/a-wedding-arch-with-flowers-and-greenery-on-it-0UFg3dkJVCU> | Церемониальная арка |
+| 7 | Jen Vazquez | <https://unsplash.com/photos/wedding-table-setting-with-floral-arrangements-and-candles-IAXH4tMEx_s> | Свечи и сервировка |
+
+Все источники обозначают изображения как бесплатные по [Unsplash License](https://unsplash.com/license). Кадр подготовки содержит узнаваемых людей и отмечен в manifest; его контекст подписан как демонстрационный.
+
