@@ -343,6 +343,8 @@ test('ноутбучная сетка сохраняет читаемую шир
  expect(Math.min(...projectWidths.map(card=>card.width)),JSON.stringify(projectWidths)).toBeGreaterThan(340);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
  await page.goto('/ratings');
+ await expect(page.locator('.rating-top-card')).toHaveCount(3);
+ await expect(page.locator('.rating-top-card').first()).toBeVisible();
  const ratingWidths=await page.locator('.rating-top-card').evaluateAll(cards=>cards.map(card=>card.getBoundingClientRect().width));
  expect(ratingWidths).toHaveLength(3);
  expect(Math.min(...ratingWidths)).toBeGreaterThan(340);
@@ -460,7 +462,7 @@ test('запрет browser storage не ломает подписку и чес�
  const button=page.locator('.profile-card .subscription-card-button').first();
  await button.click();
  await expect(button).toHaveAttribute('aria-pressed','true');
- await expect(page.getByRole('status')).toContainText('только до закрытия вкладки');
+ await expect(page.getByRole('status')).toContainText('до перезагрузки страницы');
  await page.getByRole('button',{name:'Меню профиля'}).click();
  await page.getByRole('dialog',{name:'Меню Chereda'}).getByRole('link',{name:'Подписки'}).click();
  const subscribedEntry=page.locator('.profile-card').filter({hasText:profileName}).first();
@@ -470,6 +472,11 @@ test('запрет browser storage не ломает подписку и чес�
  await page.goBack();
  const restoredButton=page.locator('.profile-card').filter({hasText:profileName}).locator('.subscription-card-button');
  await expect(restoredButton).toHaveAttribute('aria-pressed','false');
+ await restoredButton.click();
+ await expect(restoredButton).toHaveAttribute('aria-pressed','true');
+ await page.reload();
+ const afterReload=page.locator('.profile-card').filter({hasText:profileName}).locator('.subscription-card-button');
+ await expect(afterReload).toHaveAttribute('aria-pressed','false');
  expect(pageErrors).toEqual([]);
 });
 

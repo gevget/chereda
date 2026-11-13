@@ -24,7 +24,7 @@ export function SubscriptionButton({profileId,compact=false,iconOnly=false}:{pro
     const next=subscribed?current.filter(id=>id!==profileId):[...new Set([...current,profileId])];
     const persisted=writeBrowserValue(key,JSON.stringify(next));
     setSubscribed(!subscribed);
-    app.toast(`${subscribed?'Подписка снята':'Профиль добавлен в подписки'}${persisted?'':' · только до закрытия вкладки'}`);
+    app.toast(`${subscribed?'Подписка снята':'Профиль добавлен в подписки'}${persisted?'':' · до перезагрузки страницы'}`);
   };
   const label=subscribed?'Отменить подписку':'Подписаться';
   return <button className={iconOnly?'subscription-card-button icon-only':compact?'subscription-card-button':'button'} onClick={toggle} disabled={!ready} aria-pressed={subscribed} aria-label={label} title={label}>

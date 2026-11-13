@@ -24,7 +24,7 @@ export function FavoriteProButton({profileId,name}:{profileId:string;name:string
     const next=saved?current.filter(id=>id!==profileId):[...new Set([...current,profileId])];
     const persisted=writeBrowserValue(key,JSON.stringify(next));
     setSaved(!saved);
-    app.toast(`${saved?'Профиль убран из избранного PRO':'Профиль добавлен в избранное PRO'}${persisted?'':' · только до закрытия вкладки'}`);
+    app.toast(`${saved?'Профиль убран из избранного PRO':'Профиль добавлен в избранное PRO'}${persisted?'':' · до перезагрузки страницы'}`);
   };
   const label=saved?`Убрать ${name} из избранного PRO`:`Сохранить ${name} в избранное PRO`;
   return <button className="pro-catalog-save" onClick={toggle} disabled={!ready} aria-label={label} aria-pressed={saved} title={label}><LucideBookmark size={17}/></button>;
