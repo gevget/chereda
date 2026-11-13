@@ -639,12 +639,15 @@ test('мобильное сравнение и форма записи оста�
  await expect(page.getByRole('button',{name:'В сравнении'})).toHaveCount(1);
  await page.getByRole('button',{name:'Сравнить'}).first().click();
  await expect(page.getByRole('heading',{name:'Сравнение кандидатов'})).toBeVisible();
+ await expect(page.locator('.compare-service-name').filter({hasText:'Фотограф: основной пакет'})).toBeVisible();
+ await expect(page.getByText('Прокрутите таблицу по горизонтали', {exact:false})).toBeVisible();
  expect(await page.locator('.compare-table-wrap').evaluate(el=>el.scrollWidth>el.clientWidth)).toBeTruthy();
  const parameterColumn=await page.locator('.compare-table thead th:first-child').evaluate(el=>{const wrap=el.closest('.compare-table-wrap')!;const start=el.getBoundingClientRect().left;wrap.scrollLeft=120;const end=el.getBoundingClientRect().left;return{start,end,scrollLeft:wrap.scrollLeft}});
  expect(parameterColumn.scrollLeft).toBeGreaterThan(0);
  expect(Math.abs(parameterColumn.end-parameterColumn.start)).toBeLessThan(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
- await page.locator('.compare-table').getByRole('button',{name:'Записаться'}).first().click();
+ await page.locator('.compare-table-wrap').evaluate(el=>el.scrollTo({left:el.scrollWidth,behavior:'instant'}));
+ await page.locator('.compare-table tbody tr').last().locator('td').last().getByRole('button',{name:'Записаться'}).click();
  const dialog=page.getByRole('dialog',{name:'Записаться к специалисту'});
  await expect(dialog).toBeVisible();
  expect(await dialog.evaluate(el=>el.getBoundingClientRect().width<=window.innerWidth)).toBeTruthy();
@@ -656,7 +659,9 @@ test('мобильное сравнение и форма записи оста�
  await page.getByLabel('Предпочтительный канал').selectOption('whatsapp');
  await page.getByRole('textbox',{name:'Контакт для ответа'}).fill('@demo_mobile');
  await page.getByRole('textbox',{name:'Сообщение'}).fill('Нужна консультация по услуге.');
- await page.getByRole('button',{name:'Сохранить demo-заявку'}).click();
+ const submit=page.getByRole('button',{name:'Сохранить demo-заявку'});
+ await submit.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+ await submit.click();
  await expect(page.getByText('Demo-заявка сохранена')).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
  await context.close();
