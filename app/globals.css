@@ -781,3 +781,53 @@ body{font-family:'Roboto Flex Variable','Roboto Flex',Roboto,Arial,sans-serif}
 .event-create-agenda{display:grid;gap:10px}.event-create-agenda-row{display:grid;grid-template-columns:120px minmax(160px,.8fr) minmax(180px,1.3fr) 44px;align-items:end;gap:10px;padding:12px;border:1px solid var(--border-subtle);border-radius:14px}.event-create-agenda-row .field{min-width:0}.event-create-agenda-row .icon-btn{min-height:44px}
 @media(max-width:900px){.event-create-layout{grid-template-columns:1fr}.event-create-aside{position:static;grid-row:1}.event-entity-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
 @media(max-width:767px){.event-range-popover{position:fixed;top:auto;bottom:12px;left:12px;width:calc(100vw - 24px);max-height:82dvh;overflow:auto}.event-create-fields{grid-template-columns:1fr}.event-create-agenda-row{grid-template-columns:1fr 1fr}.event-create-agenda-row .field:nth-child(3){grid-column:1/-1}.event-create-agenda-row .icon-btn{justify-self:end}.event-entity-card{grid-template-columns:72px 42px minmax(0,1fr);gap:10px;padding:10px}.event-entity-card>img{height:72px}.event-entity-avatar{width:42px;height:42px}.event-entity-card>svg{display:none}.event-venue-card,.event-project-card{grid-template-columns:1fr}.event-venue-card>img,.event-project-card>img{height:180px}.event-agenda-item{grid-template-columns:58px 1fr;gap:10px}.event-person-card{padding:12px}}
+
+/* Event directory: aligned result controls and image-led category tiles. */
+.event-collection-grid,.event-category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.event-collection-grid .event-collection{min-width:0;height:100%}
+.event-collection{display:grid;grid-template-rows:auto 1fr;gap:0;overflow:hidden;padding:0}
+.event-collection-cover{display:block;width:100%;aspect-ratio:16/7;overflow:hidden;background:var(--bg-muted)}
+.event-collection-cover img{width:100%;height:100%;object-fit:cover}
+.event-collection-copy{display:grid;align-content:start;gap:8px;padding:14px}
+.event-collection-copy>b{font-size:16px;line-height:1.35}
+.event-actions.compact{justify-content:flex-start;gap:8px}
+.event-actions.compact .event-action-icon{width:40px;height:40px;min-width:40px;min-height:40px;flex:0 0 40px;padding:0;border-radius:10px}
+.event-category-card{display:grid;grid-template-columns:64px minmax(0,1fr) 18px;align-items:center;gap:14px;min-width:0;min-height:92px;padding:12px;color:var(--text-primary);text-decoration:none;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.event-category-card:hover{border-color:var(--border-strong);transform:translateY(-1px)}
+.event-category-card.selected{border-color:var(--brand-pro);background:var(--bg-subtle)}
+.event-category-icon{width:64px;height:64px;display:grid;place-items:center;border-radius:12px;background:var(--bg-muted)}
+.event-category-icon img{width:30px;height:30px;display:block}
+[data-theme=dark] .event-category-icon img{filter:invert(1)}
+.event-category-copy{display:grid;gap:5px;min-width:0}
+.event-category-copy b{font-size:15px;font-weight:560;line-height:1.3}
+.event-category-copy small{font-size:12px;line-height:1.3;color:var(--text-secondary)}
+.event-category-arrow{color:var(--text-tertiary)}
+.events-results-head{display:grid;justify-items:start;gap:14px}
+.events-results-tools{justify-content:flex-start;justify-self:start}
+.event-categories-toggle{margin-top:12px}
+@media(max-width:767px){.event-collection-grid,.event-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.event-category-card{grid-template-columns:44px minmax(0,1fr);gap:10px;min-height:74px;padding:10px}.event-category-icon{grid-row:1;width:44px;height:44px;border-radius:10px}.event-category-icon img{width:23px;height:23px}.event-category-arrow{display:none}.event-category-copy b{font-size:13px}.event-category-copy small{font-size:11px}.events-results-tools{display:flex;flex-wrap:wrap;gap:8px}}
+@media(max-width:390px){.event-collection-grid,.event-category-grid{grid-template-columns:1fr}}
+@media(max-width:767px){.event-actions.compact .event-action-icon{flex:0 0 40px}}
+.event-controls{grid-template-columns:repeat(5,minmax(0,1fr));align-items:center}
+.event-controls>*{width:100%;min-width:0}
+.event-controls>.button,.event-range-control>.button{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;white-space:nowrap}
+.event-controls>.button>svg,.event-range-control>.button>svg{flex:0 0 auto}
+.event-controls>.button>span,.event-range-control>.button>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.events-page .section-head.events-results-head{display:grid;justify-items:start;gap:14px}
+.events-page .section-head.events-results-tools{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-start;justify-self:start;gap:8px;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.events-page .section-head.events-results-tools::-webkit-scrollbar{display:none}
+.events-results-tools>.chip,.events-results-tools>.select,.events-results-tools>.text-button{flex:0 0 auto;white-space:nowrap}
+.events-results-tools>.select{width:220px;min-width:220px}
+.event-date-presets{display:flex;flex-wrap:wrap;gap:8px}
+.event-card-date-row{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap}
+.event-card-date{display:inline-flex;align-items:center;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.event-card-date>svg,.event-card-attendee>svg{flex:0 0 auto}
+.event-card-date .badge{flex:0 0 auto}
+.event-card-attendee{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.button:has(>svg){flex-wrap:nowrap;white-space:nowrap}
+.icon-meta{white-space:nowrap}
+.feed-page .project-card .icon-meta{align-items:center}
+.feed-page .project-card .icon-meta>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.feed-page .project-card-lead>.icon-meta{white-space:nowrap}
+@media(max-width:900px){.event-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767px){.event-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.event-range-popover{left:0}.events-page .section-head.events-results-tools{width:100%;overflow-x:auto}.events-results-tools>.select{width:210px;min-width:210px}}
