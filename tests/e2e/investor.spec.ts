@@ -442,12 +442,27 @@ test('дополнительные страницы ведут в понятны
 
 test('из карточки профессионала можно сразу подписаться и вернуться к нему',async({page})=>{
  await page.goto('/search?tab=profiles');
- const button=page.getByRole('button',{name:'Подписаться'}).first();
+ const button=page.locator('.profile-card .subscription-card-button').first();
  await expect(button).toBeVisible();
  await button.click();
  await expect(page.locator('.profile-card .subscription-card-button[aria-pressed="true"]').first()).toBeVisible();
  await page.goto('/subscriptions');
  await expect(page.locator('.profile-card').first()).toBeVisible();
+});
+
+test('запрет browser storage не ломает подписку и честно показывает временное состояние',async({page})=>{
+ await page.addInitScript(()=>{Storage.prototype.setItem=function(){throw new DOMException('Storage is unavailable','QuotaExceededError')}});
+ const pageErrors:string[]=[];
+ page.on('pageerror',error=>pageErrors.push(error.message));
+ await page.goto('/search?tab=profiles');
+ const button=page.locator('.profile-card .subscription-card-button').first();
+ await button.click();
+ await expect(button).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByRole('status')).toContainText('только до закрытия вкладки');
+ await button.click();
+ await expect(button).toHaveAttribute('aria-pressed','false');
+ await expect(page.getByRole('status')).toContainText('Подписка снята');
+ expect(pageErrors).toEqual([]);
 });
 
 test('визуальная карточка сразу раскрывает автора и подписку',async({page})=>{
