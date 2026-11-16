@@ -42,6 +42,14 @@ Hover улучшает понимание, но не хранит единств
 
 ## 4. Ссылки и карточки
 
+### Контекст detail-page
+
+- Карточка выдачи передаёт в detail-page `from` и внутренний `returnTo` с текущими query-параметрами.
+- Изменение выбранного media или сеанса обновляет только соответствующий параметр и сохраняет остальные параметры.
+- Кредиты проекта ведут на профиль с обратной ссылкой на проект и anchor команды; связанные событие, профиль и проект сохраняют цепочку возврата.
+- `returnTo` валидируется как same-origin path. Если значение отсутствует или невалидно, используется разделный fallback (лента, поиск, афиша, PRO, рейтинг или коллекции).
+- Переходы из рейтинга передают город, категорию и период в профиль; рейтинг → отзыв → связанный проект возвращает по цепочке без потери выбранной выборки.
+
 ### Text link
 
 - Hover: underline или усиление цвета.
@@ -309,6 +317,7 @@ Desktop: правый верхний угол под header, ширина 360–
 - Skip link к основному контенту.
 - `Escape` закрывает верхний overlay.
 - Media viewer: arrows, Escape, focus trap.
+- Feed reels: automatic slide progress pauses for reduced-motion preference; pause/resume, progress seek, previous/next buttons, ArrowLeft/ArrowRight, touch swipe, close button, backdrop and Escape work; focus stays inside the viewer and returns to the thumbnail after close.
 - Tooltip не является единственным accessible name.
 - Цвет не является единственным маркером состояния.
 - Live regions: polite для success/info, assertive для blocking error.

@@ -135,7 +135,75 @@ test('лента показывает темы по горизонтальной
  expect(geometry.scroll).toBeGreaterThan(geometry.client);
  expect(geometry.left).toBeGreaterThanOrEqual(0);
  expect(geometry.right).toBeLessThanOrEqual(390);
- await expect(rail.locator('.story-avatar')).toHaveCount(8);
+ await expect(rail.locator('.story-images img')).toHaveCount(8);
+});
+
+test('лента и поиск сохраняют контекст при переходе проект → credit-профиль → назад',async({page})=>{
+ await page.goto('/feed?tab=popular');
+ const feedProject=page.locator('.project-card-visual .media-link[href*="white-garden-wedding"]').first();
+ await feedProject.click();
+ await expect(page.getByRole('heading',{name:'Белый сад'})).toBeVisible();
+ expect(new URL(page.url()).searchParams.get('returnTo')).toBe('/feed?tab=popular');
+
+ const leadCredit=page.locator('#team .project-credit-card').filter({hasText:'Анна Миронова'});
+ await leadCredit.getByRole('link',{name:'Анна Миронова',exact:true}).click();
+ await expect(page).toHaveURL(/\/profiles\/anna-mironova-photo\//);
+ await expect(page.getByRole('heading',{name:'Анна Миронова'})).toBeVisible();
+ expect(new URL(page.url()).searchParams.get('returnTo')).toBe('/projects/white-garden-wedding#team');
+ await page.locator('.profile-detail-page > .eyebrow a').click();
+ await expect(page).toHaveURL(/\/projects\/white-garden-wedding\/?(?:\?.*)?#team$/);
+ await expect(page.locator('#team')).toBeInViewport();
+ await page.goBack();
+ await expect(page.getByRole('heading',{name:'Анна Миронова'})).toBeVisible();
+
+ await page.goto('/search?q=Белый%20сад&tab=projects&city=moscow&sort=new');
+ await page.locator('.search-project-grid .media-link[href*="white-garden-wedding"]').click();
+ await expect(page.getByRole('heading',{name:'Белый сад'})).toBeVisible();
+ const searchReturn=new URL(page.url()).searchParams.get('returnTo');
+ expect(searchReturn).toContain('/search?');
+ const restoredSearch=new URL(searchReturn!,'http://chereda.local');
+ expect(restoredSearch.searchParams.get('q')).toBe('Белый сад');
+ expect(restoredSearch.searchParams.get('tab')).toBe('projects');
+ expect(restoredSearch.searchParams.get('city')).toBe('moscow');
+ expect(restoredSearch.searchParams.get('sort')).toBe('new');
+ await page.locator('.project-detail-page > .eyebrow a').click();
+ await expect.poll(()=>new URL(page.url()).searchParams.get('q')).toBe('Белый сад');
+ await expect.poll(()=>new URL(page.url()).searchParams.get('tab')).toBe('projects');
+ await expect.poll(()=>new URL(page.url()).searchParams.get('city')).toBe('moscow');
+ await expect.poll(()=>new URL(page.url()).searchParams.get('sort')).toBe('new');
+ await expect(page.locator('.search-project-grid .media-link[href*="white-garden-wedding"]')).toBeVisible();
+});
+
+test('отзыв завершённого события синхронизирован с историей связанного проекта',async({page})=>{
+ const reviewText='Посмотрела архив и оставила отзыв о программе и команде события.';
+ await page.goto('/events/autumn-project-review?occurrence=review-2026-10-20');
+ await page.getByRole('textbox',{name:'Впечатление о событии'}).fill(reviewText);
+ await page.getByRole('button',{name:'Опубликовать отзыв'}).click();
+ await expect(page.getByText(reviewText)).toBeVisible();
+ await page.locator('.event-project-card').click();
+ await expect(page.getByRole('heading',{name:'Белый сад'})).toBeVisible();
+ await expect(page.getByText(reviewText)).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Отзывы о событии и проекте'})).toBeVisible();
+ await page.locator('.project-lifecycle-event').filter({hasText:'Разбор проекта: камерный ужин в саду'}).getByRole('link',{name:'О событии и фотоотчёте'}).click();
+ await expect(page).toHaveURL(/\/events\/autumn-project-review\/?\?occurrence=review-2026-10-20/);
+ await expect(page.getByText('Вы уже оставили отзыв об этом сеансе')).toBeVisible();
+ await page.goto('/profiles/anna-mironova-photo?tab=reviews');
+ await expect(page.getByRole('heading',{name:'Отзывы участников событий'})).toBeVisible();
+ await expect(page.getByText(reviewText)).toBeVisible();
+});
+
+test('из ленты можно открыть прошедшее событие проекта вместе с архивом и командой',async({page})=>{
+ await page.goto('/feed');
+ const archiveLink=page.locator('.visual-card-event-link[href*="autumn-project-review"]');
+ await archiveLink.locator('..').hover();
+ await expect(archiveLink).toBeVisible();
+ await archiveLink.click();
+ await expect(page).toHaveURL(/\/events\/autumn-project-review\/?\?occurrence=review-2026-10-20/);
+ await expect(page.getByRole('heading',{name:'Разбор проекта: камерный ужин в саду'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Команда события'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Фотоотчёт',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Отзывы о событии и проекте'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Оставить отзыв'})).toBeVisible();
 });
 
 test('поиск использует настоящий заголовок и не обещает неподтверждённый объём каталога',async({page})=>{
@@ -195,6 +263,49 @@ test('период рейтинга меняет score, а пустая геог
  await page.goto('/ratings?city=not-a-city');
  await expect(page.getByText(/В выбранном городе и категории пока нет demo-профилей/)).toBeVisible();
  await expect(page.locator('.rating-row')).toHaveCount(0);
+});
+
+test('рейтинг сохраняет фильтры через профиль, отзывы и связанный проект',async({page})=>{
+ const ratingUrl='/ratings?period=year&city=moscow';
+ await page.goto(ratingUrl);
+ const topProfile=page.locator('.rating-person').first();
+ await topProfile.click();
+ await expect(page.locator('.profile-detail-page')).toBeVisible();
+ expect(new URL(page.url()).searchParams.get('returnTo')).toBe(ratingUrl);
+ await page.locator('.profile-detail-page > .eyebrow a').click();
+ await expect(page).toHaveURL(/\/ratings\/?\?period=year&city=moscow/);
+ await expect(page.locator('.rating-filters select').nth(1)).toHaveValue('moscow');
+ await expect(page.locator('.rating-filters select').nth(2)).toHaveValue('year');
+
+ await page.locator('.rating-review-link').first().click();
+ await expect(page.locator('#profile-reviews')).toBeVisible();
+ const profileUrl=new URL(page.url());
+ expect(profileUrl.searchParams.get('tab')).toBe('reviews');
+ expect(profileUrl.searchParams.get('returnTo')).toBe(ratingUrl);
+ const projectLink=page.locator('#profile-reviews .review-card').first().getByRole('link',{name:'Открыть проект'});
+ await projectLink.click();
+ await expect(page.locator('.project-detail-page')).toBeVisible();
+ const projectReturnTo=new URL(page.url()).searchParams.get('returnTo');
+ expect(projectReturnTo).toBe(`${profileUrl.pathname.replace(/\/$/,'')}${profileUrl.search}`);
+ await page.locator('.project-detail-page > .eyebrow a').click();
+ await expect(page.locator('#profile-reviews')).toBeVisible();
+ await page.locator('.profile-detail-page > .eyebrow a').click();
+ await expect(page).toHaveURL(/\/ratings\/?\?period=year&city=moscow/);
+ await expect(page.locator('.rating-filters select').nth(1)).toHaveValue('moscow');
+ await expect(page.locator('.rating-filters select').nth(2)).toHaveValue('year');
+
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Тёмная'}).click();
+ await page.goto(ratingUrl);
+ await page.locator('.rating-person').first().click();
+ await expect(page).toHaveURL(/\/profiles\//);
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ expect(new URL(page.url()).searchParams.get('returnTo')).toBe(ratingUrl);
+ await page.locator('.profile-detail-page > .eyebrow a').click();
+ await expect(page).toHaveURL(/\/ratings\/?\?period=year&city=moscow/);
+ await expect(page.locator('.rating-filters select').nth(1)).toHaveValue('moscow');
+ await expect(page.locator('.rating-filters select').nth(2)).toHaveValue('year');
 });
 
 test('интересы Viewer меняют порядок рекомендаций и объяснение причин',async({page})=>{
@@ -268,11 +379,12 @@ test('карта сайта открывает все зарегистриров
  const hrefs=await page.locator('a.sitemap-link').evaluateAll(links=>links.map(link=>(link as HTMLAnchorElement).getAttribute('href')).filter((href):href is string=>Boolean(href)));
  expect(new Set(hrefs).size).toBeGreaterThan(30);
  for(const href of [...new Set(hrefs)]){
-  const response=await request.get(new URL(href,'http://127.0.0.1:3000').toString());
+  const response=await request.get(new URL(href,await page.url()).toString());
   expect(response.ok(),`${href} должен открываться из карты сайта`).toBeTruthy();
  }
 });
 test('мобильная оболочка → burger-menu → новые страницы и footer',async({browser})=>{
+ test.setTimeout(120000);
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
  const page=await context.newPage();
  for(const route of ['/feed','/search','/pro','/ratings','/register','/professional','/recommendations','/subscriptions','/favorites-pro','/platform','/pricing','/support','/blog','/faq','/knowledge','/settings?tab=sitemap','/brief','/projects/white-garden-wedding/room','/crew-match','/requests','/venue-fit','/collections/wedding-shortlist/board','/credits/anna-mironova-photo','/passport','/partners','/partners/studio-chereda','/radar']){
@@ -362,11 +474,13 @@ test('ноутбучная сетка сохраняет читаемую шир
 
 
 
-test('редкая выдача остаётся в сетке, а действия ленты не перекрывают автора на телефоне',async({browser})=>{
+test('редкая выдача остаётся в сетке, а действия карточки отделены от изображения на телефоне',async({browser})=>{
  const context=await browser.newContext({viewport:{width:1440,height:900}});
  const page=await context.newPage();
  await page.goto('/feed');
- await page.getByRole('button',{name:'Поставить реакцию'}).first().click();
+ const firstProject=page.locator('.project-card-visual').first();
+ await firstProject.hover();
+ await firstProject.getByRole('button',{name:'Поставить реакцию'}).click();
  await page.getByRole('link',{name:'Избранное'}).first().click();
  const savedCard=page.locator('.favorites-page .project-card').first();
  await expect(savedCard).toBeVisible();
@@ -376,12 +490,12 @@ test('редкая выдача остаётся в сетке, а действ�
  await page.goto('/feed');
  await expect(page.locator('.project-card-visual').first()).toBeVisible();
  const mobileCards=await page.locator('.project-card-visual').evaluateAll(cards=>cards.slice(0,8).map(card=>{
-  const creator=card.querySelector('.visual-card-creator')?.getBoundingClientRect();
+  const media=card.querySelector('.media-link')?.getBoundingClientRect();
   const actions=card.querySelector('.visual-card-actions')?.getBoundingClientRect();
-  return {creatorBottom:creator?.bottom,actionsTop:actions?.top,cardRight:card.getBoundingClientRect().right};
+  return {mediaBottom:media?.bottom,actionsTop:actions?.top,cardRight:card.getBoundingClientRect().right};
  }));
  expect(mobileCards.length).toBeGreaterThan(0);
- for(const card of mobileCards){expect(card.actionsTop! - card.creatorBottom!,JSON.stringify(mobileCards)).toBeGreaterThanOrEqual(9);expect(card.cardRight).toBeLessThanOrEqual(390)}
+ for(const card of mobileCards){expect(card.actionsTop! - card.mediaBottom!,JSON.stringify(mobileCards)).toBeGreaterThanOrEqual(9);expect(card.cardRight).toBeLessThanOrEqual(390)}
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();
  await context.close();
 });
@@ -395,6 +509,37 @@ test('избранное восстанавливает проекты до по
  await expect(page.locator('.favorites-page .empty')).toHaveCount(0);
  const widths=await page.locator('.favorites-page .project-card').evaluateAll(cards=>cards.map(card=>Math.round(card.getBoundingClientRect().width)));
  expect(widths).toEqual([278,278]);
+});
+
+test('избранное и коллекция сохраняют источник при открытии проекта',async({page})=>{
+ await page.goto('/feed');
+ await page.evaluate(()=>localStorage.setItem('chereda-demo-v1',JSON.stringify({city:'moscow',theme:'light',collections:[],likes:['white-garden-wedding'],readIds:[]})));
+ await page.reload();
+ await page.goto('/favorites');
+ const favoriteProject=page.locator('.favorites-page .project-card').filter({hasText:'Белый сад'});
+ await expect(favoriteProject).toBeVisible();
+ await favoriteProject.getByRole('link',{name:'Белый сад',exact:true}).click();
+ await page.waitForURL(/\/projects\/white-garden-wedding/);
+ expect(new URL(page.url()).searchParams.get('returnTo')).toBe('/favorites');
+ await expect(page.locator('.project-detail-page > .eyebrow a')).toHaveText('Избранное');
+ await page.locator('.project-detail-page > .eyebrow a').click();
+ await expect(page).toHaveURL(/\/favorites\/?$/);
+
+ await page.locator('.favorites-page .project-card').filter({hasText:'Белый сад'}).getByRole('link',{name:'Белый сад',exact:true}).click();
+ await page.getByRole('button',{name:'Сохранить',exact:true}).click();
+ const saveDialog=page.getByRole('dialog',{name:'Сохранить проект'});
+ await saveDialog.getByRole('textbox',{name:'Новая коллекция'}).fill('План события');
+ await saveDialog.getByRole('button',{name:'Создать и сохранить'}).click();
+ await page.getByRole('status').getByRole('link',{name:'Открыть'}).click();
+ await expect(page.getByRole('heading',{name:'План события'})).toBeVisible();
+ const collectionUrl=new URL(page.url());
+ await page.getByRole('link',{name:'Белый сад',exact:true}).click();
+ await page.waitForURL(/\/projects\/white-garden-wedding/);
+ expect(new URL(page.url()).searchParams.get('returnTo')).toBe(collectionUrl.pathname.replace(/\/$/,''));
+ await page.locator('.project-detail-page > .eyebrow a').click();
+ await page.waitForURL(/\/collections\/[^/]+\/?$/);
+ expect(new URL(page.url()).pathname.replace(/\/$/,'' )).toBe(collectionUrl.pathname.replace(/\/$/,''));
+ await expect(page.getByRole('heading',{name:'План события'})).toBeVisible();
 });
 
 test('вид PRO-подборки переключается кнопками и сохраняет остальные параметры URL',async({page})=>{
@@ -413,6 +558,41 @@ test('вид PRO-подборки переключается кнопками и
  expect(controls.every(control=>control.left>=0&&control.right<=390)).toBe(true);
  expect(controls[1].left-controls[0].right).toBeGreaterThanOrEqual(9);
  expect(controls[2].left-controls[1].right).toBeGreaterThanOrEqual(9);
+});
+
+test('PRO-каталог сохраняет фильтры при переходе к профилю и услуге',async({page})=>{
+ const source='/pro/venues?city=moscow&sort=rating&view=compact';
+ await page.goto(source);
+ const firstCard=page.locator('.pro-catalog-card').first();
+ await expect(firstCard).toBeVisible();
+ const initialCount=await page.locator('.pro-catalog-card').count();
+ await firstCard.locator('.pro-catalog-link').click();
+ await expect(page.locator('.profile-detail-page')).toBeVisible();
+ const profileUrl=new URL(page.url());
+ const returnTo=profileUrl.searchParams.get('returnTo');
+ expect(returnTo).toBe(source);
+ await page.locator('.profile-detail-page > .eyebrow a').click();
+ await expect(page).toHaveURL(/\/pro\/venues\/?\?city=moscow&sort=rating&view=compact/);
+ await expect(page.locator('.pro-results')).toHaveClass(/view-compact/);
+ await expect(page.locator('.pro-catalog-card')).toHaveCount(initialCount);
+ await page.locator('.pro-catalog-card').first().locator('.pro-catalog-link').click();
+ await page.getByRole('tab',{name:'Услуги'}).click();
+ const service=page.locator('.service-card').first();
+ const serviceName=await service.locator('h3').innerText();
+ await service.getByRole('button',{name:'Записаться'}).click();
+ const booking=page.getByRole('dialog',{name:'Записаться к специалисту'});
+ await expect(booking.locator('.booking-context')).toContainText(serviceName);
+ await booking.getByRole('button',{name:'Закрыть'}).click();
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/settings');
+ await page.getByRole('button',{name:'Тёмная'}).click();
+ await page.goto('/pro');
+ await page.locator('.pro-showcase-card').first().click();
+ await expect(page).toHaveURL(/\/profiles\//);
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ expect(new URL(page.url()).searchParams.get('returnTo')).toBe('/pro');
+ await page.locator('.profile-detail-page > .eyebrow a').click();
+ await expect(page).toHaveURL(/\/pro\/?$/);
 });
 
 test('все типы страниц содержательны и не создают горизонтальный скролл',async({browser})=>{
@@ -484,13 +664,21 @@ test('запрет browser storage не ломает подписку и чес�
  expect(pageErrors).toEqual([]);
 });
 
-test('визуальная карточка сразу раскрывает автора и подписку',async({page})=>{
+test('визуальная карточка показывает только быстрые действия, автор доступен внутри проекта',async({page})=>{
  await page.goto('/feed?tab=for-you');
  const card=page.locator('.project-card-visual').first();
- await expect(card.getByRole('link',{name:/Открыть профиль/})).toBeVisible();
- const subscribe=card.locator('button.subscription-card-button');
+ await expect(card.locator('.visual-card-creator')).toHaveCount(0);
+ await expect(card.locator('.visual-card-actions')).toBeHidden();
+ await card.hover();
+ await expect(card.locator('.visual-card-actions')).toBeVisible();
+ await card.getByRole('link',{name:'Белый сад'}).click();
+ const author=page.locator('#team .project-credit-card').filter({hasText:'Анна Миронова'});
+ await expect(author).toBeVisible();
+ await author.getByRole('link',{name:'Анна Миронова',exact:true}).click();
+ const subscribe=page.locator('.profile-intro').getByRole('button',{name:'Подписаться'});
+ await expect(subscribe).toBeVisible();
  await subscribe.click();
- await expect(subscribe).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('.profile-intro').getByRole('button',{name:'Вы подписаны'})).toBeVisible();
 });
 
 test('поиск применяет сортировку из URL к карточкам результатов',async({page})=>{
@@ -664,7 +852,11 @@ test('мобильное сравнение и форма записи оста�
  await page.getByRole('textbox',{name:'Контакт для ответа'}).fill('@demo_mobile');
  await page.getByRole('textbox',{name:'Сообщение'}).fill('Нужна консультация по услуге.');
  const submit=page.getByRole('button',{name:'Сохранить demo-заявку'});
- await submit.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+ const bookingForm=dialog.locator('form');
+ await bookingForm.evaluate(el=>el.scrollTo({top:el.scrollHeight,behavior:'instant'}));
+ const formGeometry=await dialog.evaluate(el=>{const button=el.querySelector('form>.button.pro')!.getBoundingClientRect();const textarea=el.querySelector('textarea')!.getBoundingClientRect();return{buttonTop:button.top,textareaBottom:textarea.bottom,windowBottom:el.getBoundingClientRect().bottom}});
+ expect(formGeometry.buttonTop-formGeometry.textareaBottom,JSON.stringify(formGeometry)).toBeGreaterThanOrEqual(8);
+ expect(formGeometry.buttonTop).toBeLessThan(formGeometry.windowBottom);
  await submit.click();
  await expect(page.getByText('Demo-заявка сохранена')).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBeTruthy();

@@ -339,6 +339,7 @@ flowchart TD
 - media index проекта;
 - категория, город и период рейтинга;
 - `from`, когда нужен корректный back-context.
+- `returnTo` хранит безопасный внутренний URL предыдущего списка/объекта вместе с его query-state; detail-page сохраняет его при смене media/сеанса и даёт явную обратную ссылку.
 
 ### 7.2. Не хранится в URL
 
@@ -355,7 +356,7 @@ flowchart TD
 - Slug: латиница, kebab-case.
 - Refresh восстанавливает страницу.
 - Back восстанавливает scroll и filters.
-- Canonical URL исключает технический `from`.
+- Canonical URL исключает технические `from` и `returnTo`.
 
 ### 7.4. Примеры
 
@@ -368,7 +369,7 @@ flowchart TD
 
 /profiles/forma-event?tab=projects
 
-/projects/neon-gala-2026?media=3&from=search
+/projects/neon-gala-2026?media=3&from=search&returnTo=%2Fsearch%3Fq%3Deditorial%26tab%3Dprojects
 
 /ratings?category=photographers&city=moscow&period=year
 ```
@@ -699,7 +700,7 @@ Default: `projects`.
 - verified review;
 - полезные / новые.
 
-Viewer не пишет отзыв.
+Viewer не пишет отзыв о профессионале напрямую. В расширенном разделе событий посетитель может оставить локальный demo-отзыв о завершённом событии; подтверждение реального посещения требует будущего backend-слоя.
 
 ### Нижние блоки
 
@@ -1655,6 +1656,9 @@ score =
 - Feed → Project → Back: прежний tab и scroll.
 - Search → Detail → Back: query, filters, tab и scroll.
 - Project → Profile → Back: тот же participant context.
+- Project gallery selection preserves `from` and `returnTo`; Project → credit profile → Back returns to the same project team section.
+- Project → related event → Back returns to that project; Event → project/profile → Back returns to the same event and chosen session.
+- Return destinations are accepted only as same-origin paths; an external or malformed `returnTo` falls back to the correct section root.
 - Profile → Project → Back: прежний profile tab и grid position.
 - Direct Project link → Safe back: `/feed`.
 - Direct Profile link → Safe back: `/pro`.
@@ -1769,7 +1773,7 @@ demo_reset
 - дальний infinite feed может циклически использовать dataset;
 - редкие filters работают для ключевых категорий;
 - видео может быть коротким локальным;
-- Viewer не создаёт отзыв.
+- Viewer не создаёт отзывы о профилях в demo; отзыв о завершённом событии доступен локально и маркируется как demo.
 
 ### Не выглядит активным
 
@@ -1970,6 +1974,80 @@ Demo архитектурно готово, когда:
 - финальная сборка investor demo.
 
 До следующего этапа новые роли и модули в scope не добавляются.
+
+---
+
+## 40. Актуальная карта реализованных маршрутов
+
+Этот реестр дополняет исходную карту demo: в репозитории появились раздел событий и capability-страницы. При расхождении с базовыми таблицами выше этот реестр описывает актуальные маршруты текущего demo. Для проверки фактической реализации используются `app/`, обработчик `DemoPage` и вкладка «Настройки → Карта сайта» (`/settings?tab=sitemap`). Карта сайта показывает по одному содержательному представителю динамических типов страниц, а не перечисляет все demo-записи.
+
+### Основные разделы и выдачи
+
+| Тип страницы | Маршрут | Основное назначение |
+|---|---|---|
+| Лента | `/feed` | Рилсы, темы и карточки проектов |
+| Поиск | `/search` | Поиск проектов и профилей с query/filter state |
+| PRO | `/pro` | Каталог профессионалов и категорий |
+| Категория PRO | `/pro/[categorySlug]` | Фильтры, сортировка, плотность каталога и выдача |
+| Рейтинг | `/ratings` | Рейтинг с фильтрами и объяснением score |
+| Афиша событий | `/events` | Категории, подборки, периоды, сортировка и ближайшие сеансы |
+| Категория событий | `/events/category/[categorySlug]` | Выдача событий одной категории |
+| О Chereda | `/about` | Ценность и устройство платформы |
+
+### Связанные страницы объектов
+
+| Тип страницы | Маршрут | Связи |
+|---|---|---|
+| Профиль | `/profiles/[profileSlug]` | Проекты, услуги, рейтинг, отзывы, события и контакт |
+| Проект / кейс | `/projects/[projectSlug]` | Галерея, credits, профили команды, событие и фотоотчёт |
+| Комната проекта | `/projects/[projectSlug]/room` | Локальный brief, shortlist, команда и этапы проекта |
+| Событие | `/events/[eventSlug]` | Сеансы, регистрация, организатор, площадка, команда, проект, архив и отзывы |
+| Коллекция | `/collections/[collectionSlug]` | Сохранённые проекты и переход в их исходные страницы |
+| Production board | `/collections/[collectionSlug]/board` | Локальный план подготовки на основе существующей коллекции |
+| Credits passport | `/credits/[profileSlug]` | Подтверждённые demo-связи профиля с проектами и credits |
+| Партнёрский hub | `/partners/[partnerSlug]` | Существующие профили участников и совместные проекты |
+
+### Viewer, сохранённое и события
+
+| Тип страницы | Маршрут |
+|---|---|
+| Viewer-профиль | `/me` |
+| Уведомления | `/notifications` |
+| Настройки и карта сайта | `/settings?tab=sitemap` |
+| Избранные проекты | `/favorites` |
+| Избранные профессионалы PRO | `/favorites-pro` |
+| Подписки | `/subscriptions` |
+| Рекомендации | `/recommendations` |
+| Коллекции | `/collections` |
+| Сохранённые события | `/events/saved` |
+| Мои регистрации на события | `/events/registrations` |
+| Создание локального demo-черновика события | `/events/create` |
+
+### Capability и информационные страницы
+
+| Тип страницы | Маршрут |
+|---|---|
+| Возможности платформы | `/platform` |
+| Visual → Brief | `/brief` |
+| Crew Match | `/crew-match` |
+| Venue Fit | `/venue-fit` |
+| One Brief → Many Quotes | `/requests` |
+| Cross-Border Passport | `/passport` |
+| Partner Hubs | `/partners` |
+| Market Radar | `/radar` |
+| Тарифы и справочный центр | `/pricing`, `/support` |
+| База знаний и статьи | `/knowledge`, `/blog` |
+| Вопросы, видеоуроки и вебинары | `/faq`, `/video-lessons`, `/webinars` |
+| API и сообщение о проблеме | `/api`, `/complaint` |
+| Offline/demo preview, onboarding demo и профиль профессионала | `/offline`, `/demo`, `/register`, `/professional` |
+
+Неизвестные объекты и адреса должны показывать not-found состояние, а не страницу пустого или другого объекта. Локально созданные события открываются по slug в текущем браузере; регистрацию и отзыв нельзя считать подтверждёнными backend-системой действиями.
+
+### Согласованный путь жизненного цикла события
+
+`Лента / проект → связанное событие → сеанс или архив → организатор / площадка / команда → проект и фотоотчёт → отзывы`.
+
+Карточка события в проекте показывает ту же исходную информацию и связанные сущности, что каноническая страница события. Сохранение и регистрация остаются на событии, архив и новые demo-отзывы доступны после завершения всех сеансов. Отзыв связывается с одним event ID и виден как на странице события, так и в жизненном цикле проекта.
 
 ## 6.2. Расширенный локальный реестр
 

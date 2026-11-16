@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import {usePathname,useRouter} from 'next/navigation';
 import {createContext,useCallback,useContext,useEffect,useRef,useState} from 'react';
-import {House, MagnifyingGlass, SquaresFour, BookmarkSimple, UserCircle, Bell, Sun, Moon, MapPin, X, ArrowRight, Star, CheckCircle, Info, DownloadSimple, Heart, List, Plus, CalendarBlank} from '@phosphor-icons/react';
+import {House, MagnifyingGlass, SquaresFour, UserCircle, Bell, Sun, Moon, MapPin, X, ArrowRight, Star, CheckCircle, Info, DownloadSimple, Heart, List, Plus, CalendarBlank} from '@phosphor-icons/react';
 import {cities,cityName} from '@/data/catalog';
 import {readBrowserValue,removeBrowserValues,writeBrowserValue} from '@/data/browser-storage';
 import {initialCollections,initialNotices,mediaById,profiles,projects,ratings,services} from '@/data/seed';
